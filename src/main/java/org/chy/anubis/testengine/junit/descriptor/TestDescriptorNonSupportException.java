@@ -1,4 +1,4 @@
-package org.chy.anubis.testengine.descriptor;
+package org.chy.anubis.testengine.junit.descriptor;
 
 public class TestDescriptorNonSupportException extends RuntimeException {
 

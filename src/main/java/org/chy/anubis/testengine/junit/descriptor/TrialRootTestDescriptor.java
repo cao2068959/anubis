@@ -1,41 +1,34 @@
-package org.chy.anubis.testengine.descriptor;
+package org.chy.anubis.testengine.junit.descriptor;
 
 import org.junit.platform.engine.TestDescriptor;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class TrialRootTestDescriptor extends AbstractTestDescriptor {
 
     String groupName;
-    Optional<Class> targetClass = Optional.empty();
-    Set<TrialClassTestDescriptor> allTest = new HashSet<>();
+    Map<String, TrialMethodTestDescriptor> allTest = new HashMap();
 
     public TrialRootTestDescriptor(String groupName) {
         super(groupName);
         this.groupName = groupName;
     }
 
-    public void foreach(Consumer<TrialClassTestDescriptor> consumer) {
-        for (TrialClassTestDescriptor trialClassTestDescriptor : allTest) {
-            consumer.accept(trialClassTestDescriptor);
-        }
+    public void foreach(Consumer<TrialMethodTestDescriptor> consumer) {
+        allTest.forEach((key, value) -> consumer.accept(value));
     }
-
 
     @Override
     public Set<? extends TestDescriptor> getChildren() {
-        return allTest;
+        return new HashSet<>(allTest.values());
     }
 
     @Override
     public void addChild(TestDescriptor descriptor) {
         checkTestDescriptorType(descriptor);
-        descriptor.setParent(this);
-        allTest.add((TrialClassTestDescriptor) descriptor);
+        allTest.put(descriptor.getDisplayName(), (TrialMethodTestDescriptor) descriptor);
     }
 
     @Override
@@ -49,7 +42,7 @@ public class TrialRootTestDescriptor extends AbstractTestDescriptor {
     }
 
     private void checkTestDescriptorType(TestDescriptor descriptor) {
-        if (descriptor instanceof TrialClassTestDescriptor) {
+        if (descriptor instanceof TrialMethodTestDescriptor) {
             return;
         }
         throw new TestDescriptorNonSupportException("TrialRootTestDescriptor 不支持类型: ["

@@ -1,4 +1,4 @@
-package org.chy.anubis.testengine.descriptor;
+package org.chy.anubis.testengine.junit.descriptor;
 
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestSource;
