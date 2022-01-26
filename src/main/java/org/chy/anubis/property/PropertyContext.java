@@ -3,11 +3,13 @@ package org.chy.anubis.property;
 import org.chy.anubis.log.Logger;
 import org.chy.anubis.property.mapping.AnubisProperty;
 import org.chy.anubis.property.mapping.Property;
+import org.chy.anubis.utils.ReflectUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
@@ -74,28 +76,65 @@ public class PropertyContext {
     }
 
     private void doMappingAnubisProperty(Map<String, Object> data, Object mappingStructure) {
-        if (data == null){
+        if (data == null) {
             return;
         }
 
         Class<?> mappingType = mappingStructure.getClass();
         Arrays.stream(mappingType.getDeclaredFields()).forEach(field -> {
             Property propertyAnnotation = field.getDeclaredAnnotation(Property.class);
-            if (propertyAnnotation == null){
+            if (propertyAnnotation == null) {
                 return;
             }
             String key = propertyAnnotation.value();
             Object nextData = data.get(key);
-            if (nextData == null){
+            if (nextData == null) {
                 return;
             }
 
-            Class<?> nextDataType = nextData.getClass();
-            if (nextDataType == field.getType()){
+            boolean isVoluation = voluationIfLastLayer(nextData, field, mappingStructure);
+            //如果已经赋值成功的就不处理了
+            if (isVoluation) {
+                return;
+            }
+            //还没赋值说明这层不是基础类型,继续递归去赋值
 
+            //如果接下来的值已经不是 map了,那么也没必要去递归赋值了
+            if (!(nextData instanceof Map)) {
+                return;
             }
 
+            Object nextMappingStructure = ReflectUtils.getFiledValue(field, mappingStructure);
+            //递归赋值
+            doMappingAnubisProperty((Map<String, Object>) nextData, nextMappingStructure);
         });
+    }
+
+
+    /**
+     * 如果已经是最后一层配置了,那么赋值
+     *
+     * @param data     要赋值的对象值
+     * @param field    要赋值的字段
+     * @param fieldObj 字段所属的对象
+     * @return
+     */
+    private boolean voluationIfLastLayer(Object data, Field field, Object fieldObj) {
+        Class<?> dataType = data.getClass();
+        //字段类型和数据类型一样,那么就直接赋值了
+        if (dataType == field.getType()) {
+            ReflectUtils.setFiledValue(field, fieldObj, data);
+            return true;
+        }
+        //字段类型是 string, 那么就把 data转成string类型放进去
+        if (field.getType() == String.class) {
+            ReflectUtils.setFiledValue(field, fieldObj, data.toString());
+            return true;
+        }
+
+        //TODO 其他基本类型后续用到了再支持
+
+        return false;
     }
 
 
