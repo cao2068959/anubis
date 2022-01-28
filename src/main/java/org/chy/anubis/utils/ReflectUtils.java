@@ -1,6 +1,7 @@
 package org.chy.anubis.utils;
 
 import org.chy.anubis.exception.ReflectExecException;
+import org.chy.anubis.property.PropertyEnums;
 
 import java.lang.reflect.Field;
 
@@ -25,5 +26,8 @@ public class ReflectUtils {
             throw new ReflectExecException("获取 field: [" + field.getName() + "] 属性值失败 data-type : [" + fieldObj.getClass() + "]");
         }
     }
+
+
+
 
 }

@@ -1,10 +1,14 @@
 package org.chy.anubis.testengine.junit;
 
 
+import org.chy.anubis.enums.CaseSourceType;
+import org.chy.anubis.enums.TreasuryType;
 import org.chy.anubis.property.PropertyContext;
 import org.chy.anubis.property.PropertyContextHolder;
+import org.chy.anubis.property.mapping.AnubisProperty;
 import org.chy.anubis.testengine.junit.descriptor.TrialMethodTestDescriptorBuilder;
 import org.chy.anubis.testengine.junit.descriptor.TrialRootTestDescriptor;
+import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.*;
 import org.junit.platform.engine.discovery.ClassSelector;
 import org.junit.platform.engine.discovery.MethodSelector;
@@ -33,6 +37,13 @@ public class TrialTestEngine implements TestEngine {
         discoveryRequest.getSelectorsByType(MethodSelector.class).stream().map(MethodSelector::getJavaMethod)
                 .map(TrialMethodTestDescriptorBuilder::checkAndBuild).filter(Optional::isPresent).map(Optional::get)
                 .forEach(result::addChild);
+
+        AnubisProperty anubis = PropertyContextHolder.getAnubisProperty();
+        String host = anubis.treasury.anubisService.host;
+        TreasuryType type = anubis.treasury.type;
+
+        WarehouseHolder.warehouse.getCaseCatalog(CaseSourceType.LEETCODE, "xxxx");
+
 
         try {
             Thread.sleep(5000);
