@@ -60,9 +60,6 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 
     }
 
-
-
-
     @Override
     public Optional<TestDescriptor> getParent() {
         return Optional.ofNullable(parent);

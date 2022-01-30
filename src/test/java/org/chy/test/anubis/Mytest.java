@@ -4,18 +4,18 @@ import org.chy.anubis.annotation.Trial;
 
 public class Mytest {
 
-    @Trial
+    @Trial("xxxx")
     public void onetest(){
         System.out.println("-------->");
     }
 
 
-    @Trial
+    @Trial("two_sum")
     public void onetest222(){
         System.out.println("-------->");
     }
 
-    @Trial
+    @Trial("twoSum")
     public void onetest3333(){
         System.out.println("-------->");
     }
