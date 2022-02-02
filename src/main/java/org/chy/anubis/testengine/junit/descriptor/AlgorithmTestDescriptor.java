@@ -1,25 +1,25 @@
 package org.chy.anubis.testengine.junit.descriptor;
 
 
-public class AlgorithmDescriptor extends AbstractTestDescriptor {
+public class AlgorithmTestDescriptor extends AbstractTestDescriptor {
 
-    public AlgorithmDescriptor(String name) {
+    public AlgorithmTestDescriptor(String name) {
         super(name);
     }
 
     @Override
     public Type getType() {
-        return Type.CONTAINER_AND_TEST;
+        return Type.CONTAINER;
     }
 
     @Override
     public boolean isContainer() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isTest() {
-        return true;
+        return false;
     }
 
 }

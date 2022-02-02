@@ -58,6 +58,21 @@ public class AlgorithmMethodDefinition {
         return !runCaseName.isEmpty();
     }
 
+    /**
+     * 根据查询到用例名称和配置信息来获取应该返回的用例信息
+     *
+     */
+    public Set<String> findCaseName(){
+        if (!runCaseName.isEmpty()){
+            return new HashSet<>(runCaseName);
+        }
+        return null;
+    }
+
+
+
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,6 +85,5 @@ public class AlgorithmMethodDefinition {
     public int hashCode() {
         return Objects.hash(algorithmName);
     }
-
 
 }

@@ -5,15 +5,14 @@ import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-public abstract class AbstractTestDescriptor implements TestDescriptor {
+public abstract class AbstractTestDescriptor<T extends TestDescriptor> implements TestDescriptor {
 
     String name;
-
     TestDescriptor parent;
+    Set<T> children = new HashSet<>();
+
 
     public AbstractTestDescriptor(String name) {
         this.name = name;
@@ -42,17 +41,19 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 
     @Override
     public Set<? extends TestDescriptor> getChildren() {
-        return new HashSet<>();
+        return children;
     }
 
     @Override
     public void addChild(TestDescriptor descriptor) {
-
+        descriptor.setParent(this);
+        children.add((T) descriptor);
     }
 
     @Override
     public void removeChild(TestDescriptor descriptor) {
-
+        descriptor.setParent(null);
+        children.remove(descriptor);
     }
 
     @Override
@@ -70,13 +71,10 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
         this.parent = parent;
     }
 
-
-
     @Override
     public Optional<? extends TestDescriptor> findByUniqueId(UniqueId uniqueId) {
         return Optional.empty();
     }
-
 
 
 }

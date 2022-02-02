@@ -1,15 +1,20 @@
 package org.chy.anubis.testengine.junit.descriptor;
 
+import org.chy.anubis.entity.CaseBriefInfo;
+
 public class CaseTestDescriptor extends AbstractTestDescriptor {
 
-    public CaseTestDescriptor(String name) {
-        super(name);
-    }
 
+    private final CaseBriefInfo caseBriefInfo;
+
+    public CaseTestDescriptor(String name, CaseBriefInfo caseBriefInfo) {
+        super(name);
+        this.caseBriefInfo = caseBriefInfo;
+    }
 
     @Override
     public Type getType() {
-        return Type.CONTAINER_AND_TEST;
+        return Type.TEST;
     }
 
     @Override
@@ -20,5 +25,10 @@ public class CaseTestDescriptor extends AbstractTestDescriptor {
     @Override
     public boolean isTest() {
         return true;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return caseBriefInfo.getName();
     }
 }

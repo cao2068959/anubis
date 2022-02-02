@@ -1,10 +1,13 @@
 package org.chy.anubis.testengine.junit;
 
 
+import org.chy.anubis.entity.CaseBriefInfo;
 import org.chy.anubis.enums.TreasuryType;
+import org.chy.anubis.exception.AlgorithmCaseCollectException;
 import org.chy.anubis.property.PropertyContextHolder;
 import org.chy.anubis.property.mapping.AnubisProperty;
-import org.chy.anubis.testengine.junit.descriptor.AlgorithmDescriptor;
+import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
+import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.TrialRootTestDescriptor;
 import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.*;
@@ -12,10 +15,8 @@ import org.junit.platform.engine.discovery.ClassSelector;
 import org.junit.platform.engine.discovery.MethodSelector;
 
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TrialTestEngine implements TestEngine {
 
@@ -27,6 +28,8 @@ public class TrialTestEngine implements TestEngine {
 
     @Override
     public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
+        TrialRootTestDescriptor result = new TrialRootTestDescriptor("anubis-trial-root");
+
         //先收集所有打了@Trial 注解的算法方法
         Set<AlgorithmMethodDefinition> algorithmMethodDefinitions = new HashSet<>();
 
@@ -40,28 +43,7 @@ public class TrialTestEngine implements TestEngine {
                 .forEach(algorithmMethodDefinitions::add);
 
         //每一个算法方法都去远程调用去查询这个算法下面具体的测试用例是什么
-        algorithmMethodDefinitions.forEach(algorithmMethodDefinition -> {
-            WarehouseHolder.warehouse.getCaseCatalog(algorithmMethodDefinition.getCaseSourceType(),
-                    algorithmMethodDefinition.getAlgorithmName());
-        });
-
-
-
-
-        AnubisProperty anubis = PropertyContextHolder.getAnubisProperty();
-        String host = anubis.treasury.anubisService.host;
-        TreasuryType type = anubis.treasury.type;
-
-
-
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
+        algorithmMethodDefinitions.stream().map(this::buildAlgorithmDescriptor).forEach(result::addChild);
         return result;
     }
 
@@ -72,13 +54,6 @@ public class TrialTestEngine implements TestEngine {
             return;
         }
         TrialRootTestDescriptor rootTestDescriptor = (TrialRootTestDescriptor) testDescriptor;
-        rootTestDescriptor.foreach(trialMethodTestDescriptor -> {
-            request.getEngineExecutionListener().executionStarted(trialMethodTestDescriptor);
-
-            request.getEngineExecutionListener().executionFinished(trialMethodTestDescriptor, TestExecutionResult.successful());
-
-
-        });
 
     }
 
@@ -88,10 +63,70 @@ public class TrialTestEngine implements TestEngine {
      * @param algorithmMethodDefinition
      * @return
      */
-    public AlgorithmDescriptor buildAlgorithmDescriptor(AlgorithmMethodDefinition algorithmMethodDefinition){
+    private AlgorithmTestDescriptor buildAlgorithmDescriptor(AlgorithmMethodDefinition algorithmMethodDefinition) {
+        String algorithmName = algorithmMethodDefinition.getAlgorithmName();
+        AlgorithmTestDescriptor result = new AlgorithmTestDescriptor(algorithmName);
+        //去获取这个算法将要运行的测试用例,并把他转成对应的descriptor
+        findCaseList(algorithmMethodDefinition).stream()
+                .map(caseBriefInfo -> new CaseTestDescriptor(algorithmName + "_" + caseBriefInfo.getName(), caseBriefInfo))
+                .forEach(result::addChild);
+        return result;
+    }
 
 
+    /**
+     * 根据 algorithmMethodDefinition 去获取这个算法下面对应的测试用例列表
+     *
+     * @param definition
+     * @return
+     */
+    private List<CaseBriefInfo> findCaseList(AlgorithmMethodDefinition definition) {
+        List<CaseBriefInfo> result = new ArrayList<>();
+        //如果没有指定,那么从远程仓库中获取对应的测试用例列表
+        List<CaseBriefInfo> caseCatalogs = WarehouseHolder.warehouse.getCaseCatalog(definition.getCaseSourceType(),
+                definition.getAlgorithmName());
 
+        Set<String> excludeCaseNames = definition.getExcludeCaseName();
+
+        //指定了强制要运行的案例,那么就返回指定的案列,这么还需要去看看 是否在排除用例里面
+        if (definition.isAppointRun()) {
+            Map<String, CaseBriefInfo> mapping =
+                    caseCatalogs.stream().collect(Collectors.toMap(CaseBriefInfo::getName, caseBriefInfo -> caseBriefInfo));
+            Set<String> runCaseNames = definition.getRunCaseName();
+            for (String runCaseName : runCaseNames) {
+                if (excludeCaseNames.contains(runCaseName)) {
+                    continue;
+                }
+                CaseBriefInfo caseBriefInfo = mapping.get(runCaseName);
+                if (caseBriefInfo == null) {
+                    throw new AlgorithmCaseCollectException("算法[" + definition.getAlgorithmName() + "] 指定运行的测试用例[" + runCaseName + "] 不存在");
+                }
+                result.add(caseBriefInfo);
+            }
+            return result;
+        }
+
+        //如果没有手动去指定要运行的案例,那么按照分页取对应的条数
+        int limit = definition.getLimit();
+        int startIndex = definition.getStartIndex();
+        int index = 0;
+        for (CaseBriefInfo caseBriefInfo : caseCatalogs) {
+            if (startIndex > index) {
+                index++;
+                continue;
+            }
+            //取到对应的条数了
+            if (result.size() >= limit) {
+                break;
+            }
+
+            //被排除了找一下个
+            if (excludeCaseNames.contains(caseBriefInfo.getName())) {
+                continue;
+            }
+            result.add(caseBriefInfo);
+        }
+        return result;
     }
 
 
