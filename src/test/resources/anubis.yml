@@ -7,3 +7,5 @@ anubis:
       user: xxx
     gitee:
       user: giteee
+  localcode:
+    path: /Users/bignosecat/IdeaProjects/netty/anubis/src/test/java/myaaa

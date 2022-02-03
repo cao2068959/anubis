@@ -1,10 +1,12 @@
 package org.chy.anubis.testengine.junit.descriptor;
 
+import lombok.Getter;
 import org.chy.anubis.entity.CaseBriefInfo;
 
 public class CaseTestDescriptor extends AbstractTestDescriptor {
 
 
+    @Getter
     private final CaseBriefInfo caseBriefInfo;
 
     public CaseTestDescriptor(String name, CaseBriefInfo caseBriefInfo) {

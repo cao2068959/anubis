@@ -1,7 +1,16 @@
 package org.chy.anubis.testengine.junit.descriptor;
 
 
-public class AlgorithmTestDescriptor extends AbstractTestDescriptor {
+import lombok.Getter;
+import lombok.Setter;
+import org.chy.anubis.testengine.junit.AlgorithmMethodDefinition;
+
+public class AlgorithmTestDescriptor extends AbstractTestDescriptor<CaseTestDescriptor> {
+
+    @Getter
+    @Setter
+    AlgorithmMethodDefinition algorithmMethodDefinition;
+
 
     public AlgorithmTestDescriptor(String name) {
         super(name);

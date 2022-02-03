@@ -2,13 +2,14 @@ package org.chy.anubis.testengine.junit;
 
 
 import org.chy.anubis.entity.CaseBriefInfo;
-import org.chy.anubis.enums.TreasuryType;
 import org.chy.anubis.exception.AlgorithmCaseCollectException;
-import org.chy.anubis.property.PropertyContextHolder;
-import org.chy.anubis.property.mapping.AnubisProperty;
+
+import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.TrialRootTestDescriptor;
+import org.chy.anubis.testengine.junit.executioner.AlgorithmTestExecutioner;
+import org.chy.anubis.testengine.junit.executioner.CommonExecutioner;
 import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.*;
 import org.junit.platform.engine.discovery.ClassSelector;
@@ -53,7 +54,19 @@ public class TrialTestEngine implements TestEngine {
         if (!(testDescriptor instanceof TrialRootTestDescriptor)) {
             return;
         }
+        EngineExecutionListener listener = request.getEngineExecutionListener();
         TrialRootTestDescriptor rootTestDescriptor = (TrialRootTestDescriptor) testDescriptor;
+
+        //执行root的用例
+        CommonExecutioner<TrialRootTestDescriptor> rootExecutioner = new CommonExecutioner<>(listener, rootTestDescriptor);
+        rootExecutioner.run(root -> {
+            //遍历有多少个算法
+            root.foreachChild(algorithmTest -> {
+                AlgorithmTestExecutioner algorithmTestExecutioner = new AlgorithmTestExecutioner(listener, algorithmTest);
+                //开始执行这个算法的测试
+                algorithmTestExecutioner.start();
+            });
+        });
 
     }
 
@@ -70,6 +83,8 @@ public class TrialTestEngine implements TestEngine {
         findCaseList(algorithmMethodDefinition).stream()
                 .map(caseBriefInfo -> new CaseTestDescriptor(algorithmName + "_" + caseBriefInfo.getName(), caseBriefInfo))
                 .forEach(result::addChild);
+        result.setAlgorithmMethodDefinition(algorithmMethodDefinition);
+        LocalCodeManager instance = LocalCodeManager.instance;
         return result;
     }
 

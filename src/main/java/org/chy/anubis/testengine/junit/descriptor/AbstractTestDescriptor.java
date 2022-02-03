@@ -6,6 +6,7 @@ import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public abstract class AbstractTestDescriptor<T extends TestDescriptor> implements TestDescriptor {
 
@@ -13,6 +14,15 @@ public abstract class AbstractTestDescriptor<T extends TestDescriptor> implement
     TestDescriptor parent;
     Set<T> children = new HashSet<>();
 
+
+    public void foreachChild(Consumer<T> consumer) {
+        children.forEach(consumer);
+    }
+
+
+    public Set<T> getTestChildren() {
+        return children;
+    }
 
     public AbstractTestDescriptor(String name) {
         this.name = name;
