@@ -1,6 +1,10 @@
 package org.chy.anubis.testengine.junit.executioner;
 
+import com.sun.tools.javac.api.JavacTool;
+import lombok.SneakyThrows;
+import org.chy.anubis.compiler.AnubisJavaFileManager;
 import org.chy.anubis.entity.FileInfo;
+import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.log.Logger;
 import org.chy.anubis.testengine.junit.AlgorithmMethodDefinition;
 import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
@@ -10,6 +14,15 @@ import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestDescriptor;
 
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,14 +67,39 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
      * 获取这个算法在远程仓库端定义的算法接口
      */
     private Optional<FileInfo> findAlgorithmInterface() {
-        Optional<FileInfo> fileInfo = WarehouseHolder.warehouse.getFileInfo(WarehouseUtils
+        Optional<FileInfo> algorithmInterface = LocalCodeManager.instance.getLocalCodeOrDownload(WarehouseUtils
                 .getPathFromAlgorithmPath(definition.getCaseSourceType(), definition.getAlgorithmName(),
                         ALGORITHM_INTERFACE_NAME));
 
-
-        return fileInfo;
+        algorithmInterface.ifPresent(fileInfo -> {
+            xxx(fileInfo);
+        });
+        return algorithmInterface;
 
     }
 
+    @SneakyThrows
+    public void xxx(FileInfo data){
+        JavaCompiler javaCompiler = JavacTool.create();
+        StandardJavaFileManager standardFileManager = javaCompiler.getStandardFileManager(diagnostic -> {
+            System.out.println(diagnostic);
+        }, Locale.CHINESE, StandardCharsets.UTF_8);
+
+        File file2 = new File("/Users/bignosecat/IdeaProjects/netty/anubis/src/test/java/myaaa/testcase/leetcode/two_sum/Algorithm.java");
+        Iterable<? extends JavaFileObject> javaFileObjects = standardFileManager.getJavaFileObjects(file2);
+
+
+        File file = new File("/Users/bignosecat/IdeaProjects/netty/anubis/src/test/java/myaaa/testcase/leetcode/two_sum/xxx.class");
+        FileWriter fileOutputStream = new FileWriter(file);
+
+        ArrayList<String> objects = new ArrayList<>();
+        objects.add("xxxxx");
+
+
+        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, new AnubisJavaFileManager(), null, null, null, javaFileObjects);
+        Boolean call = task.call();
+        System.out.println(call);
+
+    }
 
 }

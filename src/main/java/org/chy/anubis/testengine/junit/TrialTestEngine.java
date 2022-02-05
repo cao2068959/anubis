@@ -84,7 +84,6 @@ public class TrialTestEngine implements TestEngine {
                 .map(caseBriefInfo -> new CaseTestDescriptor(algorithmName + "_" + caseBriefInfo.getName(), caseBriefInfo))
                 .forEach(result::addChild);
         result.setAlgorithmMethodDefinition(algorithmMethodDefinition);
-        LocalCodeManager instance = LocalCodeManager.instance;
         return result;
     }
 

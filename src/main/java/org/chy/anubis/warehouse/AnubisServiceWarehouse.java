@@ -5,6 +5,7 @@ import org.chy.anubis.entity.CaseBriefInfo;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.enums.CaseSourceType;
 import org.chy.anubis.enums.FileType;
+import org.chy.anubis.log.Logger;
 import org.chy.anubis.property.PropertyContextHolder;
 import org.chy.anubis.utils.RetrofitUtils;
 import org.chy.anubis.warehouse.api.AnubisServiceApi;
@@ -44,15 +45,20 @@ public class AnubisServiceWarehouse implements Warehouse {
      */
     @Override
     public Optional<FileInfo> getFileInfo(String path) {
-        FileBlobDescribeInfoDO fileBlobDescribeInfoDO = RetrofitUtils.execJsonResult(anubisServiceApi.findFileContent(path));
-        return Optional.ofNullable(fileBlobDescribeInfoDO).map(fb -> {
-            FileInfo fileInfo = new FileInfo();
-            fileInfo.setUrl(fb.getUrl());
-            fileInfo.setFileType(fb.getFileType());
-            fileInfo.setName(fb.getName());
-            fileInfo.setBlobData(fb.getBlobData());
-            return fileInfo;
-        });
+        try {
+            FileBlobDescribeInfoDO fileBlobDescribeInfoDO = RetrofitUtils.execJsonResult(anubisServiceApi.findFileContent(path));
+            return Optional.ofNullable(fileBlobDescribeInfoDO).map(fb -> {
+                FileInfo fileInfo = new FileInfo();
+                fileInfo.setUrl(fb.getUrl());
+                fileInfo.setFileType(fb.getFileType());
+                fileInfo.setName(fb.getName());
+                fileInfo.setBlobData(fb.getBlobData());
+                return fileInfo;
+            });
+        } catch (Exception e) {
+            Logger.error("文件[" + path + "] 获取失败");
+        }
+        return Optional.empty();
     }
 
 
