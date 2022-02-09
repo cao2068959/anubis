@@ -3,6 +3,9 @@ package org.chy.anubis.testengine.junit.executioner;
 import com.sun.tools.javac.api.JavacTool;
 import lombok.SneakyThrows;
 import org.chy.anubis.compiler.AnubisJavaFileManager;
+import org.chy.anubis.compiler.CharSequenceJavaFileObject;
+import org.chy.anubis.compiler.JavaSourceFileObject;
+import org.chy.anubis.compiler.JdkDynamicCompileJavaFileManager;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.log.Logger;
@@ -21,10 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.chy.anubis.Constant.ALGORITHM_INTERFACE_NAME;
@@ -95,9 +95,20 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
         ArrayList<String> objects = new ArrayList<>();
         objects.add("xxxxx");
 
+        List<JavaFileObject> javaFileObjects1 = new ArrayList<>();
+        JavaSourceFileObject jf = new JavaSourceFileObject("Algorithm", data.getBlobData());
+        CharSequenceJavaFileObject c = new CharSequenceJavaFileObject("Algorithm",data.getBlobData());
 
-        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, new AnubisJavaFileManager(), null, null, null, javaFileObjects);
+        javaFileObjects1.add(jf);
+        AnubisJavaFileManager anubisJavaFileManager = new AnubisJavaFileManager(standardFileManager);
+
+        JdkDynamicCompileJavaFileManager jdkDynamicCompileJavaFileManager = new JdkDynamicCompileJavaFileManager(standardFileManager);
+
+        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, null, null, javaFileObjects1);
         Boolean call = task.call();
+
+        byte[] byteCode =  jf.getClassObject().getDataStream().toByteArray();
+
         System.out.println(call);
 
     }
