@@ -2,6 +2,8 @@ package org.chy.anubis.compiler;
 
 
 import lombok.Getter;
+import org.chy.anubis.entity.Pair;
+import org.chy.anubis.utils.StringUtils;
 
 import javax.tools.SimpleJavaFileObject;
 import java.io.*;
@@ -14,10 +16,17 @@ public class JavaClassFileObject extends SimpleJavaFileObject {
     @Getter
     private ByteArrayOutputStream dataStream;
 
-    public JavaClassFileObject(String className) {
-        super(createURI(className + CLASS_SUFFIX), Kind.CLASS);
-    }
+    @Getter
+    private String className;
+    @Getter
+    private String classPath;
 
+    public JavaClassFileObject(String classAllPath) {
+        super(createURI(classAllPath + CLASS_SUFFIX), Kind.CLASS);
+        Pair<String, String> pathAndName = StringUtils.separatePath(classAllPath, ".");
+        this.classPath = pathAndName.getKey();
+        this.className = pathAndName.getValue();
+    }
 
     private static URI createURI(String className) {
         try {

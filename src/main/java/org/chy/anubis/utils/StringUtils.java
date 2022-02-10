@@ -1,5 +1,7 @@
 package org.chy.anubis.utils;
 
+import org.chy.anubis.entity.Pair;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,5 +32,16 @@ public class StringUtils {
             }
         }
         return result.toString();
+    }
+
+
+    public static Pair<String, String> separatePath(String path, String separateChar) {
+        if (path == null || "".equals(path)) {
+            return Pair.of(separateChar, null);
+        }
+        int index = path.lastIndexOf(separateChar);
+        String filePath = path.substring(0, index);
+        String fileName = path.substring(index);
+        return Pair.of(filePath, fileName);
     }
 }

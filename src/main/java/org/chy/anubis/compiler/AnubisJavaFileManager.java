@@ -101,6 +101,9 @@ public class AnubisJavaFileManager implements JavaFileManager {
         JavaSourceFileObject javaSource = (JavaSourceFileObject) fileObject;
         JavaClassFileObject result = new JavaClassFileObject(javaSource.getName());
         javaSource.setClassObject(result);
+
+        //编译好的文件对象输出到 classCache 中, 这样后面的就可以直接使用编译好的文件
+        addCache(classCache, result.getClassPath(), result);
         return result;
     }
 
@@ -116,7 +119,7 @@ public class AnubisJavaFileManager implements JavaFileManager {
 
     @Override
     public void flush() throws IOException {
-        System.out.println("");
+
     }
 
     @Override
@@ -128,4 +131,13 @@ public class AnubisJavaFileManager implements JavaFileManager {
     public int isSupportedOption(String option) {
         return 0;
     }
+
+    private <K> void addCache(Map<String, List<K>> cache, String key, K value) {
+        List<K> ks = cache.get(value);
+        if (ks == null) {
+            ks = new ArrayList<>();
+        }
+        ks.add(value);
+    }
+
 }

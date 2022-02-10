@@ -124,14 +124,9 @@ public class FileUtils {
      * /aa/vv/cc/uuu.java ----> key:/aa/vv/cc  value:uuu.java
      */
     public static Pair<String, String> separatePath(String path) {
-        if (path == null || "".equals(path)) {
-            return Pair.of("/", null);
-        }
-        int index = path.lastIndexOf("/");
-        String filePath = path.substring(0, index);
-        String fileName = path.substring(index);
-        return Pair.of(filePath, fileName);
+        return StringUtils.separatePath(path, "/");
     }
+
 
     /**
      * 获取文件的后缀
