@@ -2,6 +2,9 @@ package org.chy.anubis.utils;
 
 import org.chy.anubis.entity.Pair;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,5 +46,35 @@ public class StringUtils {
         String filePath = path.substring(0, index);
         String fileName = path.substring(index);
         return Pair.of(filePath, fileName);
+    }
+
+    public static <T> String join(String prefix, String suffix, Iterable<T> datas, Function<T, String> findData) {
+        StringBuilder result = new StringBuilder(prefix);
+        boolean first = true;
+        for (T data : datas) {
+            if (first) {
+                first = false;
+            } else {
+                result.append(",");
+            }
+            String stringData = findData.apply(data);
+            result.append(stringData);
+        }
+
+        result.append(suffix);
+        return result.toString();
+    }
+
+
+    /**
+     * base64 解密
+     *
+     * @param blobData
+     */
+    public static String base64Decode(String blobData) {
+        if (blobData == null) {
+            return "";
+        }
+        return new String(Base64.getDecoder().decode(blobData), StandardCharsets.UTF_8);
     }
 }

@@ -13,13 +13,4 @@ public class FileInfo {
     FileType fileType;
     String blobData;
 
-    public byte[] getDecodeData() {
-        if (blobData == null) {
-            return new byte[0];
-        }
-
-        return Base64.getDecoder().decode(blobData);
-    }
-
-
 }

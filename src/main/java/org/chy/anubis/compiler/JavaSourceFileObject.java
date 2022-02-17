@@ -4,6 +4,7 @@ package org.chy.anubis.compiler;
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import lombok.Getter;
 import lombok.Setter;
+import org.chy.anubis.entity.JavaFile;
 
 import javax.tools.SimpleJavaFileObject;
 import java.io.*;
@@ -28,6 +29,9 @@ public class JavaSourceFileObject extends SimpleJavaFileObject {
         this.javaSourceData = javaSourceData;
     }
 
+    public JavaSourceFileObject(JavaFile javaFile) {
+        this(javaFile.getName(), javaFile.getBlobData());
+    }
 
     private static URI createURI(String className) {
         try {

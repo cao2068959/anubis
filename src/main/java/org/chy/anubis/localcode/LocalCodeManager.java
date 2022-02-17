@@ -90,14 +90,11 @@ public class LocalCodeManager {
             return Optional.empty();
         }
         FileInfo fileInfo = fileInfoOptional.get();
-        byte[] decodeData = fileInfo.getDecodeData();
+        byte[] decodeData = fileInfo.getBlobData().getBytes(StandardCharsets.UTF_8);
         //把拉到的文件写入硬盘
         FileUtils.writeFile(rootPath + filePath, decodeData);
         return Optional.of(new String(decodeData, StandardCharsets.UTF_8));
     }
-
-
-
 
 
 }

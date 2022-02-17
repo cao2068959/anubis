@@ -8,6 +8,7 @@ import org.chy.anubis.enums.FileType;
 import org.chy.anubis.log.Logger;
 import org.chy.anubis.property.PropertyContextHolder;
 import org.chy.anubis.utils.RetrofitUtils;
+import org.chy.anubis.utils.StringUtils;
 import org.chy.anubis.warehouse.api.AnubisServiceApi;
 import org.chy.anubis.warehouse.api.dos.FileBlobDescribeInfoDO;
 import retrofit2.Retrofit;
@@ -52,7 +53,7 @@ public class AnubisServiceWarehouse implements Warehouse {
                 fileInfo.setUrl(fb.getUrl());
                 fileInfo.setFileType(fb.getFileType());
                 fileInfo.setName(fb.getName());
-                fileInfo.setBlobData(fb.getBlobData());
+                fileInfo.setBlobData(StringUtils.base64Decode(fb.getBlobData()));
                 return fileInfo;
             });
         } catch (Exception e) {
