@@ -1,7 +1,12 @@
 package org.chy.anubis.ast;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
+import lombok.Getter;
+import lombok.Setter;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * 整个 java 源文件的类描述对象.
@@ -9,6 +14,17 @@ import java.util.function.Function;
 public class JavaSourceClassDefinition {
 
     char[] datas;
+
+    //类的包路径
+    @Getter
+    @Setter
+    String packagePath;
+
+    List<String> importContent = new ArrayList<>();
+
+    @Getter
+    @Setter
+    String className;
 
     public JavaSourceClassDefinition(char[] data) {
         this.datas = data;
@@ -19,33 +35,15 @@ public class JavaSourceClassDefinition {
      * 分析整个源码文件
      */
     private void analyzing() {
-        readLine(linedata ->{
-            System.out.println(linedata);
-        });
+        Resolver resolver = new Resolver(this);
+
+        resolver.parseJavaInfo();
+
     }
 
-    /**
-     * 按照行去读取
-     */
-    private void readLine(Consumer<LineData> lineCall) {
-        int startIndex = 0;
 
-        for (int i = 0; i < datas.length; i++) {
-            char data = datas[i];
-            if (data == '\n') {
-                //说明2个换行符连续了, 继续把行指针后移
-                if (startIndex == i) {
-                    startIndex++;
-                } else {
-                    LineData lineData = new LineData(datas, startIndex, i - 1);
-                    //把下一行的开始指针重新设置一下
-                    startIndex = i + 1;
-                    if (lineData.isHasContent()) {
-                        lineCall.accept(lineData);
-                    }
-                }
-            }
-        }
+    public void addImportContent(String data){
+        importContent.add(data);
     }
 
 

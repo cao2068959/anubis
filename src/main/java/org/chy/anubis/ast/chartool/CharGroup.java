@@ -1,7 +1,10 @@
-package org.chy.anubis.ast;
+package org.chy.anubis.ast.chartool;
+
+import org.chy.anubis.entity.Pair;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * 可以当做一个 char[]去使用, 为了去复用原始数据而产生的数据结构
@@ -71,15 +74,59 @@ public class CharGroup implements Iterable<Character> {
 
     /**
      * 重新设置数组指针的位置
+     *
      * @param startIndex
      * @param endIndex
      */
     protected void resetIndex(int startIndex, int endIndex) {
+        if (startIndex == this.startIndex && endIndex == this.endIndex) {
+            return;
+        }
         init(data, startIndex, endIndex);
     }
 
-    public int size(){
+    public CharGroup substring(int start, int end) {
+
+        if (start >= 0) {
+            start = this.startIndex + start;
+        } else {
+            start = this.endIndex + start;
+        }
+
+        if (end >= 0) {
+            end = this.startIndex + end;
+        } else {
+            end = this.endIndex + end;
+        }
+
+        resetIndex(start, end);
+        return this;
+    }
+
+
+    public int size() {
         return len;
+    }
+
+
+    public boolean equals(char[] target) {
+        if (size() != target.length) {
+            return false;
+        }
+
+        for (int i = 0; i < target.length - 1; i++) {
+            Character c = target[i];
+            Character oc = get(i);
+            if (c != oc) {
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    public boolean equals(String target) {
+        return equals(CharCache.get(target));
     }
 
     @Override
