@@ -6,7 +6,6 @@ import org.chy.anubis.entity.ClassFile;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.exception.CompilerException;
-import org.chy.anubis.log.Logger;
 import org.chy.anubis.utils.StringUtils;
 
 import javax.tools.StandardJavaFileManager;
@@ -45,7 +44,7 @@ public class AnubisCompilerContext {
 
         Boolean result = task.call();
         if (!result) {
-            String fileMsg = StringUtils.join("[", "]", javaFiles, FileInfo::getName);
+            String fileMsg = StringUtils.join("[", "]", javaFiles, JavaFile::getName);
             throw new CompilerException("动态编译文件失败 " + fileMsg);
         }
     }

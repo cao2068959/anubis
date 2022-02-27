@@ -79,7 +79,7 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
     }
 
     @SneakyThrows
-    public void xxx(FileInfo data){
+    public void xxx(FileInfo data) {
         JavaCompiler javaCompiler = JavacTool.create();
         StandardJavaFileManager standardFileManager = javaCompiler.getStandardFileManager(diagnostic -> {
             System.out.println(diagnostic);
@@ -97,7 +97,7 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
 
         List<JavaFileObject> javaFileObjects1 = new ArrayList<>();
         JavaSourceFileObject jf = new JavaSourceFileObject("Algorithm", data.getBlobData());
-        CharSequenceJavaFileObject c = new CharSequenceJavaFileObject("Algorithm",data.getBlobData());
+        CharSequenceJavaFileObject c = new CharSequenceJavaFileObject("Algorithm", data.getBlobData());
 
         javaFileObjects1.add(jf);
         AnubisJavaFileManager anubisJavaFileManager = new AnubisJavaFileManager(standardFileManager);
@@ -107,7 +107,7 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
         JavaCompiler.CompilationTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, null, null, javaFileObjects1);
         Boolean call = task.call();
 
-        byte[] byteCode =  jf.getClassObject().getDataStream().toByteArray();
+        byte[] byteCode = jf.getClassObject().getDataStream().toByteArray();
 
         System.out.println(call);
 
