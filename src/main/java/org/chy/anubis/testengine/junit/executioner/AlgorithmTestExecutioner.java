@@ -2,16 +2,16 @@ package org.chy.anubis.testengine.junit.executioner;
 
 import com.sun.tools.javac.api.JavacTool;
 import lombok.SneakyThrows;
-import org.chy.anubis.compiler.AnubisJavaFileManager;
-import org.chy.anubis.compiler.CharSequenceJavaFileObject;
-import org.chy.anubis.compiler.JavaSourceFileObject;
-import org.chy.anubis.compiler.JdkDynamicCompileJavaFileManager;
+import org.chy.anubis.compiler.*;
 import org.chy.anubis.entity.FileInfo;
+import org.chy.anubis.entity.JavaFile;
+import org.chy.anubis.exception.AlgorithmCaseCollectException;
 import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.log.Logger;
 import org.chy.anubis.testengine.junit.AlgorithmMethodDefinition;
 import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
+import org.chy.anubis.utils.ListUtils;
 import org.chy.anubis.utils.WarehouseUtils;
 import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.EngineExecutionListener;
@@ -21,7 +21,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -33,10 +32,16 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
 
 
     private final AlgorithmMethodDefinition definition;
+    /**
+     * 类编译器的实例
+     */
+    private final AnubisCompilerContext anubisCompilerContext;
 
-    public AlgorithmTestExecutioner(EngineExecutionListener listener, AlgorithmTestDescriptor testDescriptor) {
+    public AlgorithmTestExecutioner(EngineExecutionListener listener, AlgorithmTestDescriptor testDescriptor,
+                                    AnubisCompilerContext anubisCompilerContext) {
         super(listener, testDescriptor);
         this.definition = testDescriptor.getAlgorithmMethodDefinition();
+        this.anubisCompilerContext = anubisCompilerContext;
     }
 
     public void start() {
@@ -49,15 +54,19 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
             Logger.info("没有获取到该算法下面要执行的测试用例");
             return;
         }
+        //获取对应的接口文件
+        JavaFile algorithmInterface = findAlgorithmInterface()
+                .orElseThrow(() -> new AlgorithmCaseCollectException("[" + algorithmTestDescriptor.getDisplayName() + "] 获取算法执行接口失败"));
+        //编译对应接口文件,放入类加载器中
+        anubisCompilerContext.compiler(ListUtils.to(algorithmInterface));
 
-        findAlgorithmInterface();
         String allCaseName = testChildren.stream().map(CaseTestDescriptor::getDisplayName).collect(Collectors.joining(" , "));
         Logger.info("将要执行的测试用例为: [" + allCaseName + "]");
 
 
         //遍历这个算法下面所有的测试案例
         algorithmTestDescriptor.foreachChild(caseTestDescriptor -> {
-            CaseTestExecutioner executioner = new CaseTestExecutioner(listener, caseTestDescriptor);
+            CaseTestExecutioner executioner = new CaseTestExecutioner(listener, caseTestDescriptor, algorithmInterface);
             //开始执行这个测试用例
             executioner.start();
         });
@@ -66,16 +75,15 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
     /**
      * 获取这个算法在远程仓库端定义的算法接口
      */
-    private Optional<FileInfo> findAlgorithmInterface() {
-        Optional<FileInfo> algorithmInterface = LocalCodeManager.instance.getLocalCodeOrDownload(WarehouseUtils
-                .getPathFromAlgorithmPath(definition.getCaseSourceType(), definition.getAlgorithmName(),
-                        ALGORITHM_INTERFACE_NAME));
-
-        algorithmInterface.ifPresent(fileInfo -> {
-            xxx(fileInfo);
-        });
-        return algorithmInterface;
-
+    private Optional<JavaFile> findAlgorithmInterface() {
+        return LocalCodeManager.instance.getLocalCodeOrDownload(WarehouseUtils
+                .getPathFromAlgorithmPath(definition.getCaseSourceType(), definition.getAlgorithmName(), ALGORITHM_INTERFACE_NAME))
+                .flatMap(fileInfo -> {
+                    if (fileInfo instanceof JavaFile) {
+                        return Optional.of((JavaFile) fileInfo);
+                    }
+                    return Optional.empty();
+                });
     }
 
     @SneakyThrows

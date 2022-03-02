@@ -1,6 +1,7 @@
 package org.chy.anubis.testengine.junit;
 
 
+import org.chy.anubis.compiler.AnubisCompilerContext;
 import org.chy.anubis.entity.CaseBriefInfo;
 import org.chy.anubis.exception.AlgorithmCaseCollectException;
 
@@ -56,13 +57,14 @@ public class TrialTestEngine implements TestEngine {
         }
         EngineExecutionListener listener = request.getEngineExecutionListener();
         TrialRootTestDescriptor rootTestDescriptor = (TrialRootTestDescriptor) testDescriptor;
-
+        //所有的测试用例用同一个类编译器
+        AnubisCompilerContext compilerContext = new AnubisCompilerContext();
         //执行root的用例
         CommonExecutioner<TrialRootTestDescriptor> rootExecutioner = new CommonExecutioner<>(listener, rootTestDescriptor);
         rootExecutioner.run(root -> {
             //遍历有多少个算法
             root.foreachChild(algorithmTest -> {
-                AlgorithmTestExecutioner algorithmTestExecutioner = new AlgorithmTestExecutioner(listener, algorithmTest);
+                AlgorithmTestExecutioner algorithmTestExecutioner = new AlgorithmTestExecutioner(listener, algorithmTest, compilerContext);
                 //开始执行这个算法的测试
                 algorithmTestExecutioner.start();
             });
