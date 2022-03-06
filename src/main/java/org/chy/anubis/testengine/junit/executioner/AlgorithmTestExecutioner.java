@@ -2,7 +2,8 @@ package org.chy.anubis.testengine.junit.executioner;
 
 import com.sun.tools.javac.api.JavacTool;
 import lombok.SneakyThrows;
-import org.chy.anubis.compiler.*;
+import org.chy.anubis.dynamic.DynamicRunEngine;
+import org.chy.anubis.dynamic.compiler.*;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.exception.AlgorithmCaseCollectException;
@@ -13,9 +14,7 @@ import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
 import org.chy.anubis.utils.ListUtils;
 import org.chy.anubis.utils.WarehouseUtils;
-import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.EngineExecutionListener;
-import org.junit.platform.engine.TestDescriptor;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -33,15 +32,15 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
 
     private final AlgorithmMethodDefinition definition;
     /**
-     * 类编译器的实例
+     * 动态执行器实例
      */
-    private final AnubisCompilerContext anubisCompilerContext;
+    private final DynamicRunEngine dynamicRunEngine;
 
     public AlgorithmTestExecutioner(EngineExecutionListener listener, AlgorithmTestDescriptor testDescriptor,
-                                    AnubisCompilerContext anubisCompilerContext) {
+                                    DynamicRunEngine dynamicRunEngine) {
         super(listener, testDescriptor);
         this.definition = testDescriptor.getAlgorithmMethodDefinition();
-        this.anubisCompilerContext = anubisCompilerContext;
+        this.dynamicRunEngine = dynamicRunEngine;
     }
 
     public void start() {
@@ -57,8 +56,8 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
         //获取对应的接口文件
         JavaFile algorithmInterface = findAlgorithmInterface()
                 .orElseThrow(() -> new AlgorithmCaseCollectException("[" + algorithmTestDescriptor.getDisplayName() + "] 获取算法执行接口失败"));
-        //编译对应接口文件,放入类加载器中
-        anubisCompilerContext.compiler(ListUtils.to(algorithmInterface));
+        //编译这个接口文件
+        dynamicRunEngine.loadClass(algorithmInterface.getJavaAllClassName());
 
         String allCaseName = testChildren.stream().map(CaseTestDescriptor::getDisplayName).collect(Collectors.joining(" , "));
         Logger.info("将要执行的测试用例为: [" + allCaseName + "]");

@@ -44,7 +44,7 @@ public class StringUtils {
         }
         int index = path.lastIndexOf(separateChar);
         String filePath = path.substring(0, index);
-        String fileName = path.substring(index);
+        String fileName = path.substring(index + 1);
         return Pair.of(filePath, fileName);
     }
 

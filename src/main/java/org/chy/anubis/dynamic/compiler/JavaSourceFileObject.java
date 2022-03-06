@@ -1,7 +1,6 @@
-package org.chy.anubis.compiler;
+package org.chy.anubis.dynamic.compiler;
 
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import lombok.Getter;
 import lombok.Setter;
 import org.chy.anubis.entity.JavaFile;
@@ -23,14 +22,18 @@ public class JavaSourceFileObject extends SimpleJavaFileObject {
     @Getter
     private JavaClassFileObject classObject;
 
+    @Getter
+    private String className;
+
 
     public JavaSourceFileObject(String className, String javaSourceData) {
         super(createURI(className + JAVA_SUFFIX), Kind.SOURCE);
         this.javaSourceData = javaSourceData;
+        this.className = className;
     }
 
     public JavaSourceFileObject(JavaFile javaFile) {
-        this(javaFile.getName(), javaFile.getBlobData());
+        this(javaFile.getJavaClassName(), javaFile.getBlobData());
     }
 
     private static URI createURI(String className) {

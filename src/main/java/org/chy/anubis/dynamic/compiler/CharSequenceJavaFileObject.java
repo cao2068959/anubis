@@ -1,4 +1,4 @@
-package org.chy.anubis.compiler;
+package org.chy.anubis.dynamic.compiler;
 
 import javax.tools.SimpleJavaFileObject;
 import java.io.*;

@@ -1,11 +1,10 @@
 package org.chy.anubis.testengine.junit;
 
 
-import org.chy.anubis.compiler.AnubisCompilerContext;
+import org.chy.anubis.dynamic.DynamicRunEngine;
 import org.chy.anubis.entity.CaseBriefInfo;
 import org.chy.anubis.exception.AlgorithmCaseCollectException;
 
-import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.TrialRootTestDescriptor;
@@ -57,14 +56,14 @@ public class TrialTestEngine implements TestEngine {
         }
         EngineExecutionListener listener = request.getEngineExecutionListener();
         TrialRootTestDescriptor rootTestDescriptor = (TrialRootTestDescriptor) testDescriptor;
-        //所有的测试用例用同一个类编译器
-        AnubisCompilerContext compilerContext = new AnubisCompilerContext();
+        //所有的测试用例用同一个类编译器以及类加载器
+        DynamicRunEngine dynamicRunEngine = new DynamicRunEngine();
         //执行root的用例
         CommonExecutioner<TrialRootTestDescriptor> rootExecutioner = new CommonExecutioner<>(listener, rootTestDescriptor);
         rootExecutioner.run(root -> {
             //遍历有多少个算法
             root.foreachChild(algorithmTest -> {
-                AlgorithmTestExecutioner algorithmTestExecutioner = new AlgorithmTestExecutioner(listener, algorithmTest, compilerContext);
+                AlgorithmTestExecutioner algorithmTestExecutioner = new AlgorithmTestExecutioner(listener, algorithmTest, dynamicRunEngine);
                 //开始执行这个算法的测试
                 algorithmTestExecutioner.start();
             });

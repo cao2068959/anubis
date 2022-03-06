@@ -1,10 +1,15 @@
-package org.chy.anubis.compiler;
+package org.chy.anubis.dynamic.compiler;
 
+
+import org.chy.anubis.entity.Pair;
+import org.chy.anubis.utils.StringUtils;
 
 import javax.tools.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.chy.anubis.Constant.TREASURY_BASE_PATH;
 
 public class AnubisJavaFileManager implements JavaFileManager {
 
@@ -48,27 +53,38 @@ public class AnubisJavaFileManager implements JavaFileManager {
      * @throws IOException
      */
     private List<JavaFileObject> findClassJavaFileObject(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
-        List<JavaFileObject> result = classCache.get(packageName);
-        if (result != null) {
-            return result;
+        //先从缓存中查找
+        if (StandardLocation.CLASS_PATH == location) {
+            List<JavaFileObject> result = classCache.get(packageName);
+            if (result != null) {
+                return result;
+            }
         }
-        result = new ArrayList<>();
-        //查找的路径是 anubis-treasury 项目下面的都还没开始编译就直接返回了
-        if (packageName.startsWith("org.chy.anubis.treasury")) {
+
+        //查找的路径是 anubis-treasury 项目下面的,如果缓存没找到,说明没开始编译就不再去下面查找了
+        if (packageName.startsWith(TREASURY_BASE_PATH)) {
+            List<JavaFileObject> result = new ArrayList<>();
             classCache.put(packageName, result);
             return result;
         }
 
+        //去系统路径查找
         Iterable<JavaFileObject> localClass = standardJavaFileManager.list(location, packageName, kinds, recurse);
+        List<JavaFileObject> result = new ArrayList<>();
         for (JavaFileObject javaFileObject : localClass) {
             result.add(javaFileObject);
         }
-        classCache.put(packageName, result);
         return result;
     }
 
     @Override
     public String inferBinaryName(Location location, JavaFileObject file) {
+        if (file instanceof JavaClassFileObject) {
+            JavaClassFileObject javaClassFileObject = (JavaClassFileObject) file;
+            return javaClassFileObject.getAllClassPath();
+        }
+
+
         return standardJavaFileManager.inferBinaryName(location, file);
     }
 
@@ -92,6 +108,16 @@ public class AnubisJavaFileManager implements JavaFileManager {
         return null;
     }
 
+    /**
+     * 编译结束后的回调
+     *
+     * @param location
+     * @param className
+     * @param kind
+     * @param fileObject
+     * @return
+     * @throws IOException
+     */
     @Override
     public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject fileObject) throws IOException {
         if (!(fileObject instanceof JavaSourceFileObject)) {
@@ -99,7 +125,7 @@ public class AnubisJavaFileManager implements JavaFileManager {
         }
 
         JavaSourceFileObject javaSource = (JavaSourceFileObject) fileObject;
-        JavaClassFileObject result = new JavaClassFileObject(javaSource.getName());
+        JavaClassFileObject result = new JavaClassFileObject(className);
         javaSource.setClassObject(result);
 
         //编译好的文件对象输出到 classCache 中, 这样后面的就可以直接使用编译好的文件
@@ -133,11 +159,33 @@ public class AnubisJavaFileManager implements JavaFileManager {
     }
 
     private <K> void addCache(Map<String, List<K>> cache, String key, K value) {
-        List<K> ks = cache.get(value);
-        if (ks == null) {
-            ks = new ArrayList<>();
-        }
+        List<K> ks = cache.computeIfAbsent(key, k -> new ArrayList<>());
         ks.add(value);
+    }
+
+    /**
+     * 获取编译完后的 JavaFileObject 对象.
+     *
+     * @return
+     */
+    public Optional<JavaFileObject> getCompilerFile(String allPath) {
+        Pair<String, String> pathAndName = StringUtils.separatePath(allPath, ".");
+        List<JavaFileObject> pathFile = classCache.get(pathAndName.getKey());
+        if (pathFile == null || pathFile.size() == 0) {
+            return Optional.empty();
+        }
+
+        String allPathAndSuffix = allPath + ".class";
+        for (JavaFileObject javaFileObject : pathFile) {
+            if (allPathAndSuffix.equals(javaFileObject.getName())) {
+                return Optional.of(javaFileObject);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public boolean isExistClass(String allPath) {
+        return getCompilerFile(allPath).isPresent();
     }
 
 }

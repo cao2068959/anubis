@@ -1,4 +1,4 @@
-package org.chy.anubis.compiler;
+package org.chy.anubis.dynamic.compiler;
 
 
 import lombok.Getter;
@@ -55,5 +55,11 @@ public class JavaClassFileObject extends SimpleJavaFileObject {
     public Reader openReader(boolean ignoreEncodingErrors) throws IOException {
         return new InputStreamReader(openInputStream());
     }
+
+    public String getAllClassPath() {
+        return classPath + "." + className;
+    }
+
+
 }
 

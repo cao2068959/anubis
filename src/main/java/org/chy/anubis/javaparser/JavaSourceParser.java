@@ -2,6 +2,8 @@ package org.chy.anubis.javaparser;
 
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import org.chy.anubis.exception.JavaParserException;
 
 /**
@@ -22,7 +24,7 @@ public class JavaSourceParser {
 
     public String getClassName() {
         if (className == null) {
-            className = root.getPrimaryTypeName().orElseThrow(() -> new JavaParserException("解析 java文件失败"));
+            className = root.getTypes().getFirst().map(NodeWithSimpleName::getNameAsString).orElseThrow(() -> new JavaParserException("解析 java文件失败"));
         }
         return className;
     }

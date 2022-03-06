@@ -1,22 +1,19 @@
 package org.chy.anubis.localcode;
 
-import com.sun.tools.javac.api.JavacTool;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.Pair;
 import org.chy.anubis.enums.FileType;
 import org.chy.anubis.property.PropertyContextHolder;
 import org.chy.anubis.utils.FileUtils;
-import org.chy.anubis.utils.WarehouseUtils;
 import org.chy.anubis.warehouse.WarehouseHolder;
 
-import javax.tools.JavaCompiler;
-import javax.tools.StandardJavaFileManager;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Optional;
 
-import static org.chy.anubis.Constant.ALGORITHM_INTERFACE_NAME;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * 自动生成的代码管理器
@@ -24,7 +21,7 @@ import static org.chy.anubis.Constant.ALGORITHM_INTERFACE_NAME;
 public class LocalCodeManager {
     public static LocalCodeManager instance = new LocalCodeManager();
     private final String rootPath;
-
+    private Map<String, FileInfo> cache = new ConcurrentHashMap<>();
 
     public LocalCodeManager() {
         String path = PropertyContextHolder.context.anubis.localcode.path;
@@ -53,6 +50,11 @@ public class LocalCodeManager {
      */
     public Optional<FileInfo> getLocalCodeOrDownload(String filePath) {
         String localFilePath = rootPath + FileUtils.filePathHandler(filePath);
+        FileInfo cacheFileInfo = cache.get(filePath);
+        if (cacheFileInfo != null) {
+            return Optional.of(cacheFileInfo);
+        }
+
         Pair<String, String> pathAndName = FileUtils.separatePath(filePath);
         String fileName = pathAndName.getValue();
         if (fileName == null) {
@@ -65,7 +67,7 @@ public class LocalCodeManager {
             fileContent = downloadFile(filePath);
         }
 
-        return fileContent.map(content -> {
+        Optional<FileInfo> result = fileContent.map(content -> {
             FileInfo fileInfo = FileUtils.getFileSuffix(fileName).map(fileSuffix -> {
                 if ("java".equals(fileSuffix)) {
                     return new JavaFile();
@@ -78,6 +80,9 @@ public class LocalCodeManager {
             fileInfo.setUrl(filePath);
             return fileInfo;
         });
+
+        result.ifPresent((value) -> cache.put(filePath, value));
+        return result;
 
     }
 
