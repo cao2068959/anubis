@@ -56,8 +56,8 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
         //获取对应的接口文件
         JavaFile algorithmInterface = findAlgorithmInterface()
                 .orElseThrow(() -> new AlgorithmCaseCollectException("[" + algorithmTestDescriptor.getDisplayName() + "] 获取算法执行接口失败"));
-        //编译这个接口文件
-        dynamicRunEngine.loadClass(algorithmInterface.getJavaAllClassName());
+        //编译这个并加载这个接口文件
+        dynamicRunEngine.loadClass(algorithmInterface);
 
         String allCaseName = testChildren.stream().map(CaseTestDescriptor::getDisplayName).collect(Collectors.joining(" , "));
         Logger.info("将要执行的测试用例为: [" + allCaseName + "]");

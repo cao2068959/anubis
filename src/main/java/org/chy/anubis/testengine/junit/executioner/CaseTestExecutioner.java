@@ -3,6 +3,7 @@ package org.chy.anubis.testengine.junit.executioner;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
+import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.EngineExecutionListener;
 
 
@@ -21,6 +22,9 @@ public class CaseTestExecutioner extends CommonExecutioner<CaseTestDescriptor> {
     }
 
     private void doStart(CaseTestDescriptor caseTestDescriptor) {
+        System.out.println(caseTestDescriptor);
+
+
 
     }
 

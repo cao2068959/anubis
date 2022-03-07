@@ -119,4 +119,9 @@ public class AnubisCompilerContext {
         }
         return (JavaFile) fileInfo;
     }
+
+    public boolean isExistClass(String path){
+        return anubisJavaFileManager.isExistClass(path);
+    }
+
 }
