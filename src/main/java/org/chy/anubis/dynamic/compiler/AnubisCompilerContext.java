@@ -89,7 +89,7 @@ public class AnubisCompilerContext {
         if (!compilerFile.isPresent()) {
             //查找的class对象是 anubis.treasury 包下的,那么开始下载编译
             if (loadSource && path.startsWith(TREASURY_BASE_PATH)) {
-                JavaFile javaSource = getJavaSource(path);
+                JavaFile javaSource = LocalCodeManager.instance.getJavaSource(WarehouseUtils.javaPathToRemotePath(path));
                 //开始编译
                 compiler(ListUtils.to(javaSource));
                 //编译完再尝试获取一次
@@ -103,22 +103,6 @@ public class AnubisCompilerContext {
 
     }
 
-
-    /**
-     * 获取java的源文件
-     */
-    private JavaFile getJavaSource(String path) {
-        String remotePath = WarehouseUtils.javaPathToRemotePath(path);
-        Optional<FileInfo> fileInfoOptional = LocalCodeManager.instance.getLocalCodeOrDownload(remotePath);
-        if (!fileInfoOptional.isPresent()) {
-            throw new CompilerException("无法获取java类源文件[" + path + "] ");
-        }
-        FileInfo fileInfo = fileInfoOptional.get();
-        if (!(fileInfo instanceof JavaFile)) {
-            throw new CompilerException("获取java类源文件[" + path + "] 失败, 该文件格式不正确");
-        }
-        return (JavaFile) fileInfo;
-    }
 
     public boolean isExistClass(String path){
         return anubisJavaFileManager.isExistClass(path);

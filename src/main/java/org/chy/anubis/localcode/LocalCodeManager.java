@@ -1,9 +1,11 @@
 package org.chy.anubis.localcode;
 
+import org.apache.commons.io.FileExistsException;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.Pair;
 import org.chy.anubis.enums.FileType;
+import org.chy.anubis.exception.NoSuchFieldException;
 import org.chy.anubis.property.PropertyContextHolder;
 import org.chy.anubis.utils.FileUtils;
 import org.chy.anubis.warehouse.WarehouseHolder;
@@ -42,13 +44,29 @@ public class LocalCodeManager {
         return path;
     }
 
+    /**
+     * 获取对应的java源文件
+     * @param filePath
+     * @return
+     */
+    public JavaFile getJavaSource(String filePath) {
+        Optional<FileInfo> fileInfoOptional = getCacheFileOrDownload(filePath);
+        if (!fileInfoOptional.isPresent()) {
+            throw new NoSuchFieldException("本地/远程 无法获取文件 [" + filePath + "]");
+        }
+        FileInfo fileInfo = fileInfoOptional.get();
+        if (fileInfo instanceof JavaFile){
+            return (JavaFile) fileInfo;
+        }
+        throw new NoSuchFieldException("获取java类源文件[" + filePath + "] 失败, 该文件格式不正确");
+    }
 
     /**
-     * 获取对应路径的代码文件,如果不存在就下载对应的文件
+     * 获取对应路径的文件,如果不存在就下载对应的文件
      *
      * @param filePath
      */
-    public Optional<FileInfo> getLocalCodeOrDownload(String filePath) {
+    public Optional<FileInfo> getCacheFileOrDownload(String filePath) {
         String localFilePath = rootPath + FileUtils.filePathHandler(filePath);
         FileInfo cacheFileInfo = cache.get(filePath);
         if (cacheFileInfo != null) {
