@@ -1,6 +1,7 @@
 package org.chy.anubis.warehouse;
 
 import org.chy.anubis.entity.CaseBriefInfo;
+import org.chy.anubis.entity.FileBaseInfo;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.enums.CaseSourceType;
 
@@ -20,6 +21,13 @@ public interface Warehouse {
      */
     public List<CaseBriefInfo> getCaseCatalog(CaseSourceType caseSourceType, String algorithmName);
 
+
+    /**
+     * 查询对应目录下面所有的 文件夹/文件
+     * @param path 如果查询的路径为: org/chy/anubis/treasury/aa/bb 那么 就传 aa/bb
+     * @return
+     */
+    List<FileBaseInfo> getFileBaseInfoList(String path);
 
     /**
      * 根据文件路径获取文件内容

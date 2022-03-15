@@ -1,6 +1,7 @@
 package org.chy.anubis.localcode;
 
 import org.apache.commons.io.FileExistsException;
+import org.chy.anubis.entity.FileBaseInfo;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.Pair;
@@ -12,6 +13,8 @@ import org.chy.anubis.warehouse.WarehouseHolder;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +49,7 @@ public class LocalCodeManager {
 
     /**
      * 获取对应的java源文件
+     *
      * @param filePath
      * @return
      */
@@ -55,10 +59,38 @@ public class LocalCodeManager {
             throw new NoSuchFieldException("本地/远程 无法获取文件 [" + filePath + "]");
         }
         FileInfo fileInfo = fileInfoOptional.get();
-        if (fileInfo instanceof JavaFile){
+        if (fileInfo instanceof JavaFile) {
             return (JavaFile) fileInfo;
         }
         throw new NoSuchFieldException("获取java类源文件[" + filePath + "] 失败, 该文件格式不正确");
+    }
+
+    /**
+     * 获取一个包下的所有 java文件
+     *
+     * @param packagePath
+     * @return
+     */
+    public List<JavaFile> getJavaSourceByPackage(String packagePath) {
+        List<FileBaseInfo> fileBaseInfoList = WarehouseHolder.warehouse.getFileBaseInfoList(packagePath);
+        List<JavaFile> result = new ArrayList<>();
+        for (FileBaseInfo fileBaseInfo : fileBaseInfoList) {
+            //不是文件类型,那么就不浪费精力了
+            if (fileBaseInfo.getFileType() != FileType.BLOB) {
+                continue;
+            }
+            //从缓存或者远程仓库获取文件
+            Optional<FileInfo> fileInfoOptional = getCacheFileOrDownload(fileBaseInfo.getUrl());
+            if (!fileInfoOptional.isPresent()) {
+                continue;
+            }
+            FileInfo fileInfo = fileInfoOptional.get();
+            if (fileInfo instanceof JavaFile) {
+                result.add((JavaFile) fileInfo);
+            }
+
+        }
+        return result;
     }
 
     /**

@@ -62,11 +62,23 @@ public class WarehouseUtils {
      * 如: org.chy.anubis.treasury.testcase.leetcode.two_sum.Algorithm --->  testcase/leetcode/two_sum.Algorithm.java
      */
     public static String javaPathToRemotePath(String javaPath) {
-        if (!javaPath.startsWith(TREASURY_BASE_PATH) || javaPath.length() <= TREASURY_BASE_PATH.length() + 1) {
+        return javaPackagePathToRemotePath(javaPath, true) + ".java";
+    }
+
+    public static String javaPackagePathToRemotePath(String javaPath, boolean isException) {
+        if (!javaPath.startsWith(TREASURY_BASE_PATH)) {
+            if (!isException) {
+                return null;
+            }
             throw new RuntimeException("类: [" + javaPath + "] 不能远程获取因为基础路径为 :[" + TREASURY_BASE_PATH + "]");
         }
+        if (TREASURY_BASE_PATH.equals(javaPath)) {
+            return "";
+        }
+
+
         String result = javaPath.substring(TREASURY_BASE_PATH.length() + 1);
-        return result.replace('.', '/') + ".java";
+        return result.replace('.', '/');
     }
 
 }

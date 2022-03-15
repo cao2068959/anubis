@@ -3,11 +3,10 @@ package org.chy.anubis.entity;
 import lombok.Data;
 import org.chy.anubis.enums.FileType;
 
-import java.util.Base64;
-
 @Data
-public class FileInfo extends FileBaseInfo {
+public class FileBaseInfo {
 
-    String blobData;
-
+    String name;
+    String url;
+    FileType fileType;
 }

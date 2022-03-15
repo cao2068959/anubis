@@ -1,13 +1,18 @@
 package org.chy.anubis.dynamic.compiler;
 
 
+import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.Pair;
+import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.utils.StringUtils;
+import org.chy.anubis.utils.WarehouseUtils;
+import org.chy.anubis.warehouse.WarehouseHolder;
 
 import javax.tools.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.chy.anubis.Constant.TREASURY_BASE_PATH;
 
@@ -30,9 +35,17 @@ public class AnubisJavaFileManager implements JavaFileManager {
     @Override
     public Iterable<JavaFileObject> list(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
         //查找编译所依赖的 class文件
-        if (location == StandardLocation.CLASS_PATH) {
+        if (location == StandardLocation.CLASS_PATH && kinds.contains(JavaFileObject.Kind.CLASS)) {
             return findClassJavaFileObject(location, packageName, kinds, recurse);
         }
+
+        //查找编译所依赖的 源码文件
+        if (location == StandardLocation.SOURCE_PATH && kinds.contains(JavaFileObject.Kind.SOURCE)) {
+            if (packageName.startsWith(TREASURY_BASE_PATH)) {
+                return findSourceJavaFileObject(location, packageName, kinds, recurse);
+            }
+        }
+
         //jdk下那些依赖的包
         if (location == StandardLocation.PLATFORM_CLASS_PATH) {
             return standardJavaFileManager.list(location, packageName, kinds, recurse);
@@ -54,26 +67,34 @@ public class AnubisJavaFileManager implements JavaFileManager {
      */
     private List<JavaFileObject> findClassJavaFileObject(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
         //先从缓存中查找
-        if (StandardLocation.CLASS_PATH == location) {
-            List<JavaFileObject> result = classCache.get(packageName);
-            if (result != null) {
-                return result;
-            }
+        List<JavaFileObject> result = classCache.get(packageName);
+        if (result != null) {
+            return result;
         }
 
+        result = new ArrayList<>();
         //查找的路径是 anubis-treasury 项目下面的,如果缓存没找到,说明没开始编译就不再去下面查找了
         if (packageName.startsWith(TREASURY_BASE_PATH)) {
-            List<JavaFileObject> result = new ArrayList<>();
             classCache.put(packageName, result);
             return result;
         }
 
         //去系统路径查找
         Iterable<JavaFileObject> localClass = standardJavaFileManager.list(location, packageName, kinds, recurse);
-        List<JavaFileObject> result = new ArrayList<>();
+
         for (JavaFileObject javaFileObject : localClass) {
             result.add(javaFileObject);
         }
+        return result;
+    }
+
+    private List<JavaFileObject> findSourceJavaFileObject(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
+        String packagePath = WarehouseUtils.javaPackagePathToRemotePath(packageName, false);
+        if (packagePath == null) {
+            return new ArrayList<>();
+        }
+        List<JavaFile> javaSourceByPackage = LocalCodeManager.instance.getJavaSourceByPackage(packagePath);
+        List<JavaFileObject> result = javaSourceByPackage.stream().map(javaFile -> new JavaSourceFileObject(javaFile)).collect(Collectors.toList());
         return result;
     }
 
@@ -84,6 +105,10 @@ public class AnubisJavaFileManager implements JavaFileManager {
             return javaClassFileObject.getAllClassPath();
         }
 
+        if (file instanceof JavaSourceFileObject) {
+            JavaSourceFileObject javaSourceFileObject = (JavaSourceFileObject) file;
+            return javaSourceFileObject.getAllClassPath();
+        }
 
         return standardJavaFileManager.inferBinaryName(location, file);
     }

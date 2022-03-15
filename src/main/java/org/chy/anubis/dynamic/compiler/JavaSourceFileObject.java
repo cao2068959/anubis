@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 public class JavaSourceFileObject extends SimpleJavaFileObject {
 
     private final static String JAVA_SUFFIX = ".java";
+    private final String classPath;
     private String javaSourceData;
 
     /**
@@ -26,14 +27,15 @@ public class JavaSourceFileObject extends SimpleJavaFileObject {
     private String className;
 
 
-    public JavaSourceFileObject(String className, String javaSourceData) {
+    public JavaSourceFileObject(String className, String packagePath, String javaSourceData) {
         super(createURI(className + JAVA_SUFFIX), Kind.SOURCE);
         this.javaSourceData = javaSourceData;
         this.className = className;
+        this.classPath = packagePath;
     }
 
     public JavaSourceFileObject(JavaFile javaFile) {
-        this(javaFile.getJavaClassName(), javaFile.getBlobData());
+        this(javaFile.getJavaClassName(), javaFile.getPackagePath(), javaFile.getBlobData());
     }
 
     private static URI createURI(String className) {
@@ -50,5 +52,9 @@ public class JavaSourceFileObject extends SimpleJavaFileObject {
         return javaSourceData;
     }
 
+
+    public String getAllClassPath() {
+        return classPath + "." + className;
+    }
 }
 

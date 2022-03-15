@@ -2,6 +2,7 @@ package org.chy.anubis.warehouse;
 
 import com.google.gson.Gson;
 import org.chy.anubis.entity.CaseBriefInfo;
+import org.chy.anubis.entity.FileBaseInfo;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.enums.CaseSourceType;
 import org.chy.anubis.enums.FileType;
@@ -38,6 +39,24 @@ public class AnubisServiceWarehouse implements Warehouse {
                 .map(fileDescribeInfoDO -> CaseBriefInfo.builder().name(fileDescribeInfoDO.getName()).url(fileDescribeInfoDO.getUrl()).build())
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 查询对应目录下面所有的 文件夹/文件
+     * @param path
+     * @return
+     */
+    @Override
+    public List<FileBaseInfo> getFileBaseInfoList(String path) {
+        return RetrofitUtils.execJsonResult(anubisServiceApi.findFileList(path)).stream()
+                .map(fileDescribeInfoDO -> {
+                    FileBaseInfo result = new FileBaseInfo();
+                    result.setName(fileDescribeInfoDO.getName());
+                    result.setFileType(fileDescribeInfoDO.getFileType());
+                    result.setUrl(fileDescribeInfoDO.getUrl());
+                    return result;
+                }).collect(Collectors.toList());
+    }
+
 
     /**
      * 根据文件路径获取文件内容
