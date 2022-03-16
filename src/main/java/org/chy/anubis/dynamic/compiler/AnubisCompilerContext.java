@@ -59,7 +59,8 @@ public class AnubisCompilerContext {
             return;
         }
 
-        JavacTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, null, null,
+
+        JavacTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, ListUtils.to("-proc:none"), null,
                 javaSourceFileObjects);
 
         Boolean result = task.call();

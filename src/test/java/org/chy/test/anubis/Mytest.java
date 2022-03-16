@@ -11,8 +11,9 @@ public class Mytest {
 
 
     @Trial("two_sum")
-    public void onetest222(){
+    public int[] onetest222(int[] nums, Integer target){
         System.out.println("-------->");
+        return null;
     }
 
     @Trial("twoSum")

@@ -39,7 +39,7 @@ public class CaseTestExecutioner extends CommonExecutioner<CaseTestDescriptor> {
         JavaFile templateCase = LocalCodeManager.instance.getJavaSource(caseBriefInfo.getUrl() + "/" + TESTCASE_TEMPLATE_CASE);
         Class<?> aClass = dynamicRunEngine.loadClass(templateCase);
 
-        System.out.println(templateCase);
+        System.out.println(aClass);
 
 
 

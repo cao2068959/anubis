@@ -22,6 +22,8 @@ public class AnubisJavaFileManager implements JavaFileManager {
 
     //key:对应的包路径 value:对应这个路径下的所有class文件
     Map<String, List<JavaFileObject>> classCache = new ConcurrentHashMap<>();
+    //源码文件的缓存
+    Map<String, List<JavaFileObject>> sourceCache = new ConcurrentHashMap<>();
 
     public AnubisJavaFileManager(StandardJavaFileManager standardJavaFileManager) {
         this.standardJavaFileManager = standardJavaFileManager;
@@ -88,13 +90,24 @@ public class AnubisJavaFileManager implements JavaFileManager {
         return result;
     }
 
+    /**
+     * 查询在对应的路径下面有没可以读取到java源文件, 编译时候可能会依赖到
+     */
     private List<JavaFileObject> findSourceJavaFileObject(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
+        //先从缓存中获取
+        List<JavaFileObject> result = sourceCache.get(packageName);
+        if (result != null) {
+            return result;
+        }
+
         String packagePath = WarehouseUtils.javaPackagePathToRemotePath(packageName, false);
         if (packagePath == null) {
             return new ArrayList<>();
         }
+        //去远程或者本地获取对应的源码文件
         List<JavaFile> javaSourceByPackage = LocalCodeManager.instance.getJavaSourceByPackage(packagePath);
-        List<JavaFileObject> result = javaSourceByPackage.stream().map(javaFile -> new JavaSourceFileObject(javaFile)).collect(Collectors.toList());
+        result = javaSourceByPackage.stream().map(JavaSourceFileObject::new).collect(Collectors.toList());
+        sourceCache.put(packageName, result);
         return result;
     }
 
