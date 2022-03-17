@@ -1,0 +1,40 @@
+package ${packagePath};
+
+
+import org.chy.anubis.dynamic.execute.ExecuteInterceptor;
+import org.chy.anubis.dynamic.execute.Executer;
+
+public class AlgorithmTemplate_${name} implements Executer, ${algorithmInterface} {
+
+    ExecuteInterceptor interceptor;
+
+
+    @Override
+    ${algorithmMethod} {
+        ${testInstanceClass} instance = new ${testInstanceClass}();
+        Object t = null;
+        if (interceptor != null) {
+            t = interceptor.before();
+        }
+        //T result = instance.xxx(aa,bb);
+        ${testMethodReturn}${testMethodReturnFlag}instance.${testMethodName}(${testMethodArgs});
+
+        if (interceptor != null) {
+            interceptor.after(t);
+        }
+        //return resuly;
+        ${resultReturn}
+    }
+
+    @Override
+    public void run() {
+        TestCase testCase = new TestCase();
+        testCase.run(this);
+    }
+
+    @Override
+    public void setInterceptor(ExecuteInterceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
+}
