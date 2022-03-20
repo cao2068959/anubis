@@ -1,8 +1,8 @@
 package ${packagePath};
 
 
-import org.chy.anubis.dynamic.execute.ExecuteInterceptor;
-import org.chy.anubis.dynamic.execute.Executer;
+import org.chy.anubis.dynamic.template.ExecuteInterceptor;
+import org.chy.anubis.dynamic.template.Executer;
 
 public class AlgorithmTemplate_${name} implements Executer, ${algorithmInterface} {
 
@@ -28,7 +28,7 @@ public class AlgorithmTemplate_${name} implements Executer, ${algorithmInterface
 
     @Override
     public void run() {
-        TestCase testCase = new TestCase();
+        ${TestCaseAllPath} testCase = new ${TestCaseAllPath}();
         testCase.run(this);
     }
 

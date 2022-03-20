@@ -1,4 +1,4 @@
-package org.chy.anubis.dynamic.execute;
+package org.chy.anubis.dynamic.template;
 
 /**
  * 动态执行的拦截器

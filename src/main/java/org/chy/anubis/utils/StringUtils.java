@@ -4,6 +4,7 @@ import org.chy.anubis.entity.Pair;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +14,9 @@ import static java.util.Arrays.stream;
 public class StringUtils {
 
     private static Pattern humpPattern = Pattern.compile("[A-Z]");
+
+    private static char[] allChar = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
 
     /**
      * 驼峰转下划线
@@ -76,5 +80,20 @@ public class StringUtils {
             return "";
         }
         return new String(Base64.getDecoder().decode(blobData), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 随机生成指定位数的字符串
+     */
+    public static String randomStr(int i) {
+        Random random = new Random();
+        StringBuilder result = new StringBuilder();
+        int bound = allChar.length - 1;
+        int index = i;
+        while (index != 0) {
+            result.append(allChar[random.nextInt(bound)]);
+            index--;
+        }
+        return result.toString();
     }
 }

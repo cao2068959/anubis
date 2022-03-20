@@ -11,4 +11,7 @@ public class Constant {
     public static final String ALGORITHM_INTERFACE_NAME = "Algorithm.java";
 
     public static final String TREASURY_BASE_PATH = "org.chy.anubis.treasury";
+
+    public static final String ALGORITHM_TEMPLATE_NAME = "AlgorithmTemplate";
+
 }

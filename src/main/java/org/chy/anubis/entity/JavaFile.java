@@ -1,5 +1,6 @@
 package org.chy.anubis.entity;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
 import org.chy.anubis.exception.JavaParserException;
 import org.chy.anubis.javaparser.JavaParserContainer;
 import org.chy.anubis.javaparser.JavaSourceParser;
@@ -65,4 +66,14 @@ public class JavaFile extends FileInfo {
         }
         return javaAllClassName;
     }
+
+    /**
+     * 获取这个类中的第一个方法
+     */
+    public JavaMethodInfo getFirstMethod() {
+        MethodDeclaration methodDeclaration = getJavaSourceParser().getFirstMethod()
+                .orElseThrow(() -> new JavaParserException("[" + getJavaAllClassName() + "] 中没有任何的方法"));
+        return new JavaMethodInfo(methodDeclaration);
+    }
+
 }
