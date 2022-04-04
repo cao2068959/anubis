@@ -9,6 +9,10 @@ public class Logger {
         System.out.println(msg);
     }
 
+    public static void waring(String msg) {
+        System.out.println(msg);
+    }
+
     public static void error(String msg) {
         System.out.println(msg);
     }

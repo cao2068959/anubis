@@ -6,7 +6,9 @@ import com.github.javaparser.ast.type.Type;
 import lombok.Getter;
 import org.chy.anubis.utils.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class JavaMethodInfo {
 
@@ -37,6 +39,11 @@ public class JavaMethodInfo {
     public Optional<String> getReturnType() {
         Type type = methodDeclaration.getType();
         return Optional.ofNullable(type.asString());
+    }
+
+    public List<parameterInfo> getParameter() {
+        return methodDeclaration.getParameters().stream().map(parameter -> new parameterInfo(parameter.getTypeAsString(),
+                parameter.getNameAsString())).collect(Collectors.toList());
     }
 
 }
