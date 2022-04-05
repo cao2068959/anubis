@@ -1,6 +1,6 @@
 package org.chy.anubis.localcode;
 
-import org.apache.commons.io.FileExistsException;
+import org.chy.anubis.Constant;
 import org.chy.anubis.entity.FileBaseInfo;
 import org.chy.anubis.entity.FileInfo;
 import org.chy.anubis.entity.JavaFile;
@@ -11,13 +11,13 @@ import org.chy.anubis.property.PropertyContextHolder;
 import org.chy.anubis.utils.FileUtils;
 import org.chy.anubis.warehouse.WarehouseHolder;
 
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 
 /**
@@ -28,15 +28,17 @@ public class LocalCodeManager {
     private final String rootPath;
     private Map<String, FileInfo> cache = new ConcurrentHashMap<>();
 
+
     public LocalCodeManager() {
         String path = PropertyContextHolder.context.anubis.localcode.path;
         if (path == null) {
             path = generatedRootPath();
         }
-        this.rootPath = path;
-
+        this.rootPath = path + "/" + Constant.TREASURY_BASE_PATH.replace(".", "/");
+        ;
         //先把对应的目录给创建好
         FileUtils.initDir(rootPath);
+
     }
 
 
@@ -99,7 +101,12 @@ public class LocalCodeManager {
      * @param filePath
      */
     public Optional<FileInfo> getCacheFileOrDownload(String filePath) {
-        String localFilePath = rootPath + FileUtils.filePathHandler(filePath);
+        return getCacheFileOrLoad(filePath, this::downloadFile);
+    }
+
+
+    public Optional<FileInfo> getCacheFileOrLoad(String filePath, Function<String, Optional<String>> loadFun) {
+        String localFilePath = rootPath  + FileUtils.filePathHandler(filePath);
         FileInfo cacheFileInfo = cache.get(filePath);
         if (cacheFileInfo != null) {
             return Optional.of(cacheFileInfo);
@@ -112,9 +119,13 @@ public class LocalCodeManager {
         }
 
         Optional<String> fileContent = FileUtils.readFile(localFilePath);
-        //本地没有这个文件,那么开始下载这个文件
+        //本地没有这个文件,那么从某个地方获取这个问题
         if (!fileContent.isPresent()) {
-            fileContent = downloadFile(filePath);
+            fileContent = loadFun.apply(filePath);
+            fileContent.ifPresent(content -> {
+                //把拉到的文件写入硬盘
+                FileUtils.writeFile(localFilePath, content.getBytes(StandardCharsets.UTF_8));
+            });
         }
 
         Optional<FileInfo> result = fileContent.map(content -> {
@@ -131,10 +142,14 @@ public class LocalCodeManager {
             return fileInfo;
         });
 
-        result.ifPresent((value) -> cache.put(filePath, value));
+        result.ifPresent((value) -> {
+            //写入缓存
+            cache.put(filePath, value);
+        });
         return result;
 
     }
+
 
     private Optional<String> downloadFile(String filePath) {
         filePath = FileUtils.filePathHandler(filePath);
@@ -146,8 +161,6 @@ public class LocalCodeManager {
         }
         FileInfo fileInfo = fileInfoOptional.get();
         byte[] decodeData = fileInfo.getBlobData().getBytes(StandardCharsets.UTF_8);
-        //把拉到的文件写入硬盘
-        FileUtils.writeFile(rootPath + filePath, decodeData);
         return Optional.of(new String(decodeData, StandardCharsets.UTF_8));
     }
 

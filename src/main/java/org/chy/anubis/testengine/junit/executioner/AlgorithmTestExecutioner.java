@@ -33,6 +33,7 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
 
     public AlgorithmTestExecutioner(EngineExecutionListener listener, AlgorithmTestDescriptor testDescriptor,
                                     DynamicRunEngine dynamicRunEngine) {
+
         super(listener, testDescriptor);
         this.definition = testDescriptor.getAlgorithmMethodDefinition();
         this.dynamicRunEngine = dynamicRunEngine;

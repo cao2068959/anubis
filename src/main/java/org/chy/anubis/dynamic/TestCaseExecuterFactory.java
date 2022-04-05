@@ -8,6 +8,7 @@ import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.JavaMethodInfo;
 import org.chy.anubis.entity.parameterInfo;
 import org.chy.anubis.exception.CompilerException;
+import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.log.Logger;
 import org.chy.anubis.utils.ReflectUtils;
 import org.chy.anubis.utils.StringUtils;
@@ -38,7 +39,7 @@ public class TestCaseExecuterFactory {
      * @return
      */
     public Class<? extends TestCaseExecuter> getBootstrapTestCaseExecuter(String algorithmName, CtTemplate ctTemplate, Method testMethod,
-                                                         JavaFile algorithmInterface) {
+                                                                          JavaFile algorithmInterface) {
         return genBootstrapClass(algorithmName, ctTemplate, testMethod, algorithmInterface);
     }
 
@@ -50,9 +51,15 @@ public class TestCaseExecuterFactory {
 
     private Class<? extends TestCaseExecuter> genBootstrapClass(String algorithmName, CtTemplate ctTemplate, Method testMethod,
                                                                 JavaFile algorithmInterface) {
-        String bootstrapJavaSource = genBootstrapJavaSource(algorithmName, ctTemplate, testMethod, algorithmInterface);
-        JavaFile bootstrapJavaFile = new JavaFile();
-        bootstrapJavaFile.setBlobData(bootstrapJavaSource);
+        String bootstrapFilePath = "bootstrap." + algorithmName;
+
+        String fileName = "AlgorithmTemplate_" + algorithmName;
+        String filePath = (bootstrapFilePath + "." + fileName).replace(".","/");
+        JavaFile bootstrapJavaFile = (JavaFile) LocalCodeManager.instance.getCacheFileOrLoad(filePath + ".java", path->{
+            //生成包路径
+            String packageName = Constant.TREASURY_BASE_PATH + "." + bootstrapFilePath;
+            return Optional.of(genBootstrapJavaSource(algorithmName, packageName, ctTemplate, testMethod, algorithmInterface));
+        }).orElseThrow(()-> new RuntimeException("生成 BootstrapClass 异常"));
         //开始编译
         return (Class<? extends TestCaseExecuter>) dynamicRunEngine.loadClass(bootstrapJavaFile);
     }
@@ -60,13 +67,12 @@ public class TestCaseExecuterFactory {
     /**
      * 生成入口类的java源文件
      */
-    private String genBootstrapJavaSource(String algorithmName, CtTemplate ctTemplate, Method testMethod,
+    private String genBootstrapJavaSource(String algorithmName, String packageName,
+                                          CtTemplate ctTemplate, Method testMethod,
                                           JavaFile algorithmInterface) {
 
         //本次执行算法的名称
         algorithmName = StringUtils.humpToLine(algorithmName);
-        //生成包路径
-        String packageName = Constant.TREASURY_BASE_PATH + ".bootstrap." + algorithmName;
         ctTemplate.addParam("packagePath", packageName);
         //生成 className
         ctTemplate.addParam("name", algorithmName);
