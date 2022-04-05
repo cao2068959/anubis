@@ -1,9 +1,10 @@
 package org.chy.anubis.utils;
 
 import org.chy.anubis.exception.ReflectExecException;
-import org.chy.anubis.property.PropertyEnums;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
 public class ReflectUtils {
 
@@ -27,7 +28,28 @@ public class ReflectUtils {
         }
     }
 
+    /**
+     * 生成实例,只能使用无参构造器
+     */
+    public static <T> T getInstance(Class<T> type) {
+        Constructor<?>[] constructors = type.getConstructors();
+        Constructor<?> useConstructor = null;
+        for (Constructor<?> constructor : constructors) {
+            if (constructor.getParameterCount() == 0) {
+                useConstructor = constructor;
+                break;
+            }
+        }
+        if (useConstructor == null) {
+            throw new ReflectExecException("类[" + type.getTypeName() + "] 没有无参构造器,无法实例化");
+        }
+        try {
+            return (T) useConstructor.newInstance();
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new ReflectExecException("类[" + type.getTypeName() + "] 实例化失败 原因 [" + e.getMessage() + "]", e);
+        }
 
+    }
 
 
 }

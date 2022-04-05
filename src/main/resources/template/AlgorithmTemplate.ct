@@ -2,12 +2,14 @@ package ${packagePath};
 
 
 import org.chy.anubis.dynamic.template.ExecuteInterceptor;
-import org.chy.anubis.dynamic.template.Executer;
+import org.chy.anubis.dynamic.template.TestCaseExecuter;
+import org.chy.anubis.treasury.Exector;
 
-public class AlgorithmTemplate_${name} implements Executer, ${algorithmInterface} {
+public class AlgorithmTemplate_${name} implements TestCaseExecuter, ${algorithmInterface} {
 
     ExecuteInterceptor interceptor;
 
+    Exector testCase;
 
     @Override
     ${algorithmMethod} {
@@ -28,13 +30,17 @@ public class AlgorithmTemplate_${name} implements Executer, ${algorithmInterface
 
     @Override
     public void run() {
-        ${TestCaseAllPath} testCase = new ${TestCaseAllPath}();
         testCase.run(this);
     }
 
     @Override
     public void setInterceptor(ExecuteInterceptor interceptor) {
         this.interceptor = interceptor;
+    }
+
+    @Override
+    public void setTestCase(Object testCase){
+        this.testCase = (Exector)testCase;
     }
 
 }

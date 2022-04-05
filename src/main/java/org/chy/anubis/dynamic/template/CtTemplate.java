@@ -1,7 +1,7 @@
 package org.chy.anubis.dynamic.template;
 
-import lombok.Data;
 import lombok.Getter;
+import org.chy.anubis.utils.PlaceholderUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,4 +24,7 @@ public class CtTemplate {
         params.put(name, value);
     }
 
+    public String executeTemplate() {
+        return PlaceholderUtils.replacePlaceholder(templateContent, params, "${", "}");
+    }
 }

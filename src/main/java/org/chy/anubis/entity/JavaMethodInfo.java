@@ -28,7 +28,7 @@ public class JavaMethodInfo {
         methodDeclaration.getModifiers().forEach(modifier -> {
             result.append(modifier).append(" ");
         });
-        result.append(methodDeclaration.getType());
+        result.append(methodDeclaration.getType()).append(" ");
         result.append(methodDeclaration.getName());
 
         String parameters = StringUtils.join("(", ")", methodDeclaration.getParameters(), Node::toString);

@@ -2,7 +2,6 @@ package org.chy.anubis.testengine.junit.executioner;
 
 import org.chy.anubis.testengine.junit.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.EngineExecutionListener;
-import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 
 import java.util.function.Consumer;
