@@ -1,5 +1,6 @@
 package org.chy.anubis.testengine.junit.executioner;
 
+import org.chy.anubis.exception.InterruptException;
 import org.chy.anubis.testengine.junit.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestExecutionResult;
@@ -22,6 +23,11 @@ public class CommonExecutioner<T extends AbstractTestDescriptor> {
             consumer.accept(testDescriptor);
             listener.executionFinished(testDescriptor, TestExecutionResult.successful());
         } catch (Exception e) {
+            if (e instanceof InterruptException){
+                e.setStackTrace(new StackTraceElement[0]);
+                listener.executionFinished(testDescriptor, TestExecutionResult.failed(e));
+                return;
+            }
             listener.executionFinished(testDescriptor, TestExecutionResult.failed(e));
         }
     }

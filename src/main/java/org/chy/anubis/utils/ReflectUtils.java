@@ -48,7 +48,16 @@ public class ReflectUtils {
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new ReflectExecException("类[" + type.getTypeName() + "] 实例化失败 原因 [" + e.getMessage() + "]", e);
         }
+    }
 
+    public static Object getInstance(String type) {
+        Class<?> aClass;
+        try {
+            aClass = Class.forName(type);
+        } catch (ClassNotFoundException e) {
+            throw new ReflectExecException("类[" + type + "]不存在 ", e);
+        }
+        return getInstance(aClass);
     }
 
 

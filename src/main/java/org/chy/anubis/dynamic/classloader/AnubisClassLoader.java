@@ -1,6 +1,7 @@
 package org.chy.anubis.dynamic.classloader;
 
 import org.chy.anubis.dynamic.compiler.AnubisCompilerContext;
+import org.chy.anubis.inject.InjectManager;
 
 public class AnubisClassLoader extends ClassLoader {
 
@@ -18,6 +19,9 @@ public class AnubisClassLoader extends ClassLoader {
         if (classData == null) {
             return super.findClass(name);
         }
-        return defineClass(name, classData, 0, classData.length);
+        Class<?> result = defineClass(name, classData, 0, classData.length);
+        //如果有对象需要注入的那么处理一下
+        InjectManager.inject(result);
+        return result;
     }
 }

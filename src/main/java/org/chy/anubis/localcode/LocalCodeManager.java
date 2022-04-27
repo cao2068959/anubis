@@ -106,7 +106,7 @@ public class LocalCodeManager {
 
 
     public Optional<FileInfo> getCacheFileOrLoad(String filePath, Function<String, Optional<String>> loadFun) {
-        String localFilePath = rootPath  + FileUtils.filePathHandler(filePath);
+        String localFilePath = rootPath + FileUtils.filePathHandler(filePath);
         FileInfo cacheFileInfo = cache.get(filePath);
         if (cacheFileInfo != null) {
             return Optional.of(cacheFileInfo);
@@ -118,7 +118,9 @@ public class LocalCodeManager {
             return Optional.empty();
         }
 
-        Optional<String> fileContent = FileUtils.readFile(localFilePath);
+        //是否从本地缓存文件中读取代码
+        Boolean localCodeRefresh = PropertyContextHolder.context.anubis.localcode.refresh;
+        Optional<String> fileContent = localCodeRefresh ? Optional.empty() : FileUtils.readFile(localFilePath);
         //本地没有这个文件,那么从某个地方获取这个问题
         if (!fileContent.isPresent()) {
             fileContent = loadFun.apply(filePath);

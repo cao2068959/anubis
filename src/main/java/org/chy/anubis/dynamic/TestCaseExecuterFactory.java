@@ -54,12 +54,12 @@ public class TestCaseExecuterFactory {
         String bootstrapFilePath = "bootstrap." + algorithmName;
 
         String fileName = "AlgorithmTemplate_" + algorithmName;
-        String filePath = (bootstrapFilePath + "." + fileName).replace(".","/");
-        JavaFile bootstrapJavaFile = (JavaFile) LocalCodeManager.instance.getCacheFileOrLoad(filePath + ".java", path->{
+        String filePath = (bootstrapFilePath + "." + fileName).replace(".", "/");
+        JavaFile bootstrapJavaFile = (JavaFile) LocalCodeManager.instance.getCacheFileOrLoad(filePath + ".java", path -> {
             //生成包路径
             String packageName = Constant.TREASURY_BASE_PATH + "." + bootstrapFilePath;
             return Optional.of(genBootstrapJavaSource(algorithmName, packageName, ctTemplate, testMethod, algorithmInterface));
-        }).orElseThrow(()-> new RuntimeException("生成 BootstrapClass 异常"));
+        }).orElseThrow(() -> new RuntimeException("生成 BootstrapClass 异常"));
         //开始编译
         return (Class<? extends TestCaseExecuter>) dynamicRunEngine.loadClass(bootstrapJavaFile);
     }

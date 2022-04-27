@@ -1,7 +1,6 @@
 package org.chy.anubis.property;
 
 import org.chy.anubis.exception.PropertyMappingException;
-import org.chy.anubis.exception.ReflectExecException;
 import org.chy.anubis.log.Logger;
 import org.chy.anubis.property.mapping.AnubisProperty;
 import org.chy.anubis.property.mapping.Property;
@@ -34,7 +33,7 @@ public class PropertyContext {
         //读取配置文件
         Optional<File> propertyFile = readPropertyFile();
         if (!propertyFile.isPresent()) {
-            Logger.info("没有读取到配置文件,使用默认的配置");
+            Logger.waring("没有读取到配置文件,使用默认的配置");
             return;
         }
         //解析配置文件

@@ -8,4 +8,5 @@ anubis:
     gitee:
       user: giteee
   localcode:
-    path: /Users/bignosecat/IdeaProjects/netty/anubis/src/test/java
+    refresh: true
+    #path: /Users/bignosecat/IdeaProjects/netty/anubis/src/test/java

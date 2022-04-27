@@ -46,7 +46,7 @@ public class AlgorithmTestExecutioner extends CommonExecutioner<AlgorithmTestDes
     public void doStart(AlgorithmTestDescriptor algorithmTestDescriptor) {
         Set<CaseTestDescriptor> testChildren = algorithmTestDescriptor.getTestChildren();
         if (testChildren == null || testChildren.isEmpty()) {
-            Logger.info("没有获取到该算法下面要执行的测试用例");
+            Logger.waring("没有获取到该算法下面要执行的测试用例");
             return;
         }
         //获取对应的接口文件

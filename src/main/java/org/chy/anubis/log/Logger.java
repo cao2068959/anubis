@@ -1,24 +1,20 @@
 package org.chy.anubis.log;
 
-import java.io.OutputStream;
-import java.io.Writer;
+import org.chy.anubis.treasury.log.ILogger;
 
 public class Logger {
 
+    static ILogger logger = new LoggerImp();
+
     public static void info(String msg) {
-        System.out.println(msg);
+        logger.info(msg);
     }
 
     public static void waring(String msg) {
-        System.out.println(msg);
+        logger.warning(msg);
     }
 
     public static void error(String msg) {
-        System.out.println(msg);
-    }
-
-
-    public static OutputStream printWriter(){
-        return System.out;
+        logger.error(msg, false);
     }
 }

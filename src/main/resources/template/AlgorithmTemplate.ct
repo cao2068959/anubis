@@ -5,6 +5,7 @@ import org.chy.anubis.dynamic.template.ExecuteInterceptor;
 import org.chy.anubis.dynamic.template.TestCaseExecuter;
 import org.chy.anubis.treasury.Exector;
 
+@SuppressWarnings("unchecked")
 public class AlgorithmTemplate_${name} implements TestCaseExecuter, ${algorithmInterface} {
 
     ExecuteInterceptor interceptor;
@@ -12,7 +13,7 @@ public class AlgorithmTemplate_${name} implements TestCaseExecuter, ${algorithmI
     Exector testCase;
 
     @Override
-    ${algorithmMethod} {
+    public ${algorithmMethod} {
         ${testInstanceClass} instance = new ${testInstanceClass}();
         Object t = null;
         if (interceptor != null) {

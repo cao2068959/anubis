@@ -14,6 +14,9 @@ public class JavaMethodInfo {
 
     MethodDeclaration methodDeclaration;
 
+    /**
+     * 不包含 Modifiers
+     */
     @Getter
     String methodSignature;
 
@@ -25,16 +28,14 @@ public class JavaMethodInfo {
 
     private void genMethodSignature() {
         StringBuilder result = new StringBuilder();
-        methodDeclaration.getModifiers().forEach(modifier -> {
-            result.append(modifier).append(" ");
-        });
         result.append(methodDeclaration.getType()).append(" ");
         result.append(methodDeclaration.getName());
-
         String parameters = StringUtils.join("(", ")", methodDeclaration.getParameters(), Node::toString);
         result.append(parameters);
         this.methodSignature = result.toString();
     }
+
+
 
     public Optional<String> getReturnType() {
         Type type = methodDeclaration.getType();
