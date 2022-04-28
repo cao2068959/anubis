@@ -1,7 +1,17 @@
 package org.chy.anubis.utils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+
 public class TypeUtils {
 
+    static ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    }
 
     /**
      * 类型匹配, 如果是基本数据类型, 都会转成包装类去比较
@@ -69,5 +79,11 @@ public class TypeUtils {
         return type;
     }
 
+    @SneakyThrows
+    public static  <T> T convert(Object data, Class<T> type) {
+
+        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+        return objectMapper.readValue(jsonString, type);
+    }
 
 }

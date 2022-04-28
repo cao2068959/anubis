@@ -22,7 +22,7 @@ public class CommonExecutioner<T extends AbstractTestDescriptor> {
         try {
             consumer.accept(testDescriptor);
             listener.executionFinished(testDescriptor, TestExecutionResult.successful());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (e instanceof InterruptException){
                 e.setStackTrace(new StackTraceElement[0]);
                 listener.executionFinished(testDescriptor, TestExecutionResult.failed(e));

@@ -42,8 +42,8 @@ public class JavaMethodInfo {
         return Optional.ofNullable(type.asString());
     }
 
-    public List<parameterInfo> getParameter() {
-        return methodDeclaration.getParameters().stream().map(parameter -> new parameterInfo(parameter.getTypeAsString(),
+    public List<ParameterInfo> getParameter() {
+        return methodDeclaration.getParameters().stream().map(parameter -> new ParameterInfo(parameter.getTypeAsString(),
                 parameter.getNameAsString())).collect(Collectors.toList());
     }
 

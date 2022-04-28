@@ -1,12 +1,14 @@
 package org.chy.anubis.javaparser;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import org.chy.anubis.exception.JavaParserException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 整个 java源文件的解析器
@@ -48,6 +50,10 @@ public class JavaSourceParser {
             this.methods = type.getMethods();
         }
         return methods;
+    }
+
+    public List<String> getImports() {
+        return root.getImports().stream().map(ImportDeclaration::toString).collect(Collectors.toList());
     }
 
     public Optional<MethodDeclaration> getFirstMethod(){

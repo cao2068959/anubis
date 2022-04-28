@@ -5,6 +5,8 @@ import org.chy.anubis.exception.JavaParserException;
 import org.chy.anubis.javaparser.JavaParserContainer;
 import org.chy.anubis.javaparser.JavaSourceParser;
 
+import java.util.List;
+
 public class JavaFile extends FileInfo {
 
     /**
@@ -67,6 +69,9 @@ public class JavaFile extends FileInfo {
         return javaAllClassName;
     }
 
+    public List<String> getImports() {
+        return  getJavaSourceParser().getImports();
+    }
     /**
      * 获取这个类中的第一个方法
      */

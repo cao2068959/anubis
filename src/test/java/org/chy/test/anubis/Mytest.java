@@ -1,6 +1,7 @@
 package org.chy.test.anubis;
 
 import org.chy.anubis.annotation.Trial;
+import org.chy.test.anubis.dto.ListNode;
 
 public class Mytest {
 
@@ -18,6 +19,12 @@ public class Mytest {
     @Trial("twoSum")
     public void onetest3333() {
         System.out.println("-------->");
+    }
+
+    @Trial("addTwoNumbers")
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        System.out.println(l1);
+        return null;
     }
 
 }
