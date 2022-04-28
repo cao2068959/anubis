@@ -13,12 +13,13 @@ import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class PropertyContext {
 
-    Map<String, Object> data;
+    Map<String, Object> data = new HashMap<>();
 
     public AnubisProperty anubis = new AnubisProperty();
 
@@ -50,6 +51,7 @@ public class PropertyContext {
             e.printStackTrace();
             Logger.error("读取配置文件[" + file.getName() + "]失败,使用默认的配置");
         }
+
     }
 
     /**

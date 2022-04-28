@@ -8,7 +8,7 @@ public interface ExecuteInterceptor<T> {
     /**
      * 执行前
      */
-    <T> T before();
+    T before();
 
     /**
      * 执行后

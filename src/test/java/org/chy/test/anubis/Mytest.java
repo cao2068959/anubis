@@ -9,7 +9,6 @@ public class Mytest {
         System.out.println("-------->");
     }
 
-
     @Trial("two_sum")
     public int[] onetest222(int[] nums, Integer target) {
         System.out.println("-------->");

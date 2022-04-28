@@ -14,7 +14,6 @@ import org.chy.anubis.utils.ReflectUtils;
 import org.chy.anubis.utils.StringUtils;
 import org.chy.anubis.utils.TypeUtils;
 
-import javax.jws.WebParam;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -95,7 +94,7 @@ public class TestCaseExecuterFactory {
     }
 
 
-    private void bootstrapClassParamsHandle(@WebParam JavaMethodInfo algorithmInterfaceMethod, Method method, CtTemplate ctTemplate) {
+    private void bootstrapClassParamsHandle(JavaMethodInfo algorithmInterfaceMethod, Method method, CtTemplate ctTemplate) {
         List<parameterInfo> parameters = algorithmInterfaceMethod.getParameter();
         Parameter[] loacalMethodParameters = method.getParameters();
         List<String> result = new ArrayList<>();

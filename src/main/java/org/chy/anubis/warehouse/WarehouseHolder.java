@@ -22,7 +22,7 @@ public class WarehouseHolder {
             return;
         }
 
-
+        throw new RuntimeException("数据源["+type.getName()+"] 暂时不支持, 请重新设置 参数 anubis.treasury.type来指定数据源");
     }
 
 

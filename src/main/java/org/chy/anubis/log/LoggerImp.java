@@ -9,7 +9,6 @@ public class LoggerImp implements ILogger {
     @Override
     public void info(String msg) {
         System.out.println(font(msg, 32));
-
     }
 
     @Override
@@ -29,7 +28,7 @@ public class LoggerImp implements ILogger {
      * 有样式的字体
      *
      * @param content
-     * @param color  31:红色 32:绿色 33:黄色
+     * @param color  31:红色 32:绿色 33:黄色 34: 蓝色
      * @return
      */
     private String font(String content, int color) {

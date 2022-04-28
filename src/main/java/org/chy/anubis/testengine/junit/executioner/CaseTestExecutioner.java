@@ -1,6 +1,7 @@
 package org.chy.anubis.testengine.junit.executioner;
 
 import org.chy.anubis.dynamic.DynamicRunEngine;
+import org.chy.anubis.dynamic.template.CommonExecuteInterceptor;
 import org.chy.anubis.dynamic.template.TestCaseExecuter;
 import org.chy.anubis.entity.CaseBriefInfo;
 import org.chy.anubis.entity.JavaFile;
@@ -47,6 +48,7 @@ public class CaseTestExecutioner extends CommonExecutioner<CaseTestDescriptor> {
         TestCaseExecuter testCaseExecuter = ReflectUtils.getInstance(testCaseExecuterClass);
         Object templateCase = ReflectUtils.getInstance(templateCaseClass);
         testCaseExecuter.setTestCase(templateCase);
+        testCaseExecuter.setInterceptor(new CommonExecuteInterceptor());
         return testCaseExecuter;
     }
 
