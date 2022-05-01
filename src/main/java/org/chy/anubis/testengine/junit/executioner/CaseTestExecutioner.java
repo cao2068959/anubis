@@ -33,6 +33,7 @@ public class CaseTestExecutioner extends CommonExecutioner<CaseTestDescriptor> {
     }
 
     private void doStart(CaseTestDescriptor caseTestDescriptor) {
+
         CaseBriefInfo caseBriefInfo = caseTestDescriptor.getCaseBriefInfo();
 
         //获取这个执行案例的模版方法

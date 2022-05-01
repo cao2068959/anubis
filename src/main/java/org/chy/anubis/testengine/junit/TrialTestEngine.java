@@ -1,10 +1,10 @@
 package org.chy.anubis.testengine.junit;
 
 
+import lombok.SneakyThrows;
 import org.chy.anubis.dynamic.DynamicRunEngine;
 import org.chy.anubis.entity.CaseBriefInfo;
 import org.chy.anubis.exception.AlgorithmCaseCollectException;
-
 import org.chy.anubis.testengine.junit.descriptor.AlgorithmTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.CaseTestDescriptor;
 import org.chy.anubis.testengine.junit.descriptor.TrialRootTestDescriptor;
@@ -14,7 +14,6 @@ import org.chy.anubis.warehouse.WarehouseHolder;
 import org.junit.platform.engine.*;
 import org.junit.platform.engine.discovery.ClassSelector;
 import org.junit.platform.engine.discovery.MethodSelector;
-
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +26,7 @@ public class TrialTestEngine implements TestEngine {
         return "trialTestEngine";
     }
 
+    @SneakyThrows
     @Override
     public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
         TrialRootTestDescriptor result = new TrialRootTestDescriptor("anubis-trial-root");

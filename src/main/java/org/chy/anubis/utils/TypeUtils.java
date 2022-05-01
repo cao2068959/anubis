@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TypeUtils {
 
     static ObjectMapper objectMapper = new ObjectMapper();
@@ -80,10 +83,28 @@ public class TypeUtils {
     }
 
     @SneakyThrows
-    public static  <T> T convert(Object data, Class<T> type) {
+    public static <T> T convert(Object data, Class<T> type) {
 
         String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
         return objectMapper.readValue(jsonString, type);
+    }
+
+
+    /**
+     * 生成对应的通用转换表达式
+     *
+     * @param oldIntanceName 要转换对象的名称
+     * @param newType        要转换的类型
+     * @param newIntanceName 转换后对象的名称
+     * @return 对应的转换表达式
+     */
+    public static String genConvertExpression(String oldIntanceName, String newType, String newIntanceName) {
+        String converTemplate = "${converType} ${newIntance} = org.chy.anubis.utils.TypeUtils.convert(${convertValue}, ${converType}.class);";
+        Map<String, String> params = new HashMap<>();
+        params.put("newIntance", newIntanceName);
+        params.put("converType", newType);
+        params.put("convertValue", oldIntanceName);
+        return PlaceholderUtils.replacePlaceholder(converTemplate, params, "${", "}");
     }
 
 }

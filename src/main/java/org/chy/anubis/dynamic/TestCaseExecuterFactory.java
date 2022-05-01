@@ -11,6 +11,7 @@ import org.chy.anubis.entity.ParameterInfo;
 import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.utils.ReflectUtils;
 import org.chy.anubis.utils.StringUtils;
+import org.chy.anubis.utils.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -84,7 +85,7 @@ public class TestCaseExecuterFactory {
         ctTemplate.addParam("testMethodName", testMethod.getName());
         ctTemplate.addParam("testInstanceClass", testMethod.getDeclaringClass().getTypeName());
         //对返回值做一些处理
-        bootstrapClassReturnHandle(algorithmInterfaceMethod, ctTemplate);
+        bootstrapClassReturnHandle(algorithmInterfaceMethod, testMethod, ctTemplate);
         //参数处理
         bootstrapClassParamsHandle(algorithmInterfaceMethod, testMethod, ctTemplate);
 
@@ -104,24 +105,30 @@ public class TestCaseExecuterFactory {
     }
 
 
-
     private String formatParam(List<ParameterInfo> parameters) {
         return StringUtils.join("(", ")", parameters,
                 ParameterInfo -> ParameterInfo.getType() + " " + ParameterInfo.getName());
     }
 
-    private void bootstrapClassReturnHandle(JavaMethodInfo algorithmInterfaceMethod, CtTemplate ctTemplate) {
+    private void bootstrapClassReturnHandle(JavaMethodInfo algorithmInterfaceMethod, Method testMethod, CtTemplate ctTemplate) {
         Optional<String> returnType = algorithmInterfaceMethod.getReturnType();
-        if (!returnType.isPresent()) {
+        Class<?> testMethodReturnType = testMethod.getReturnType();
+        if (!returnType.isPresent() || testMethodReturnType == Void.class) {
             ctTemplate.addParam("testMethodReturn", "");
             ctTemplate.addParam("testMethodReturnFlag", "");
             ctTemplate.addParam("resultReturn", "");
+            ctTemplate.addParam("resultConvert", "");
             return;
         }
+        String testMethodResultName = "testMethodResult";
+        String resultName = "result";
 
-        ctTemplate.addParam("testMethodReturn", returnType.get());
-        ctTemplate.addParam("testMethodReturnFlag", " result = ");
-        ctTemplate.addParam("resultReturn", "return result;");
+        ctTemplate.addParam("testMethodReturn", testMethodReturnType.getTypeName());
+        ctTemplate.addParam("testMethodReturnFlag", " " + testMethodResultName + " = ");
+        //对本地方法的结果进行转换
+        String expression = TypeUtils.genConvertExpression(testMethodResultName, returnType.get(), resultName);
+        ctTemplate.addParam("resultConvert", expression);
+        ctTemplate.addParam("resultReturn", "return " + resultName + ";");
     }
 
 

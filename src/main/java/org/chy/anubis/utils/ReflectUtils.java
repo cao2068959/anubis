@@ -50,10 +50,10 @@ public class ReflectUtils {
         }
     }
 
-    public static Object getInstance(String type) {
+    public static Object getInstance(String type,ClassLoader classLoader) {
         Class<?> aClass;
         try {
-            aClass = Class.forName(type);
+            aClass = classLoader.loadClass(type);
         } catch (ClassNotFoundException e) {
             throw new ReflectExecException("类[" + type + "]不存在 ", e);
         }

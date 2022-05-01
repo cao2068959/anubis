@@ -9,7 +9,9 @@ import org.chy.anubis.utils.ReflectUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 注入管理器, 动态编译, 动态编译之后的代码如果有 static 字段存在注解 @Inject 则会被注入对应的实例, 具体注入什么对象
@@ -18,6 +20,8 @@ import java.util.Map;
 public class InjectManager {
 
     static Map<String, String> mapping = new HashMap<>();
+    static Set<Class<?>> cache = new HashSet<>();
+
 
     static {
         AnubisProperty anubisProperty = PropertyContextHolder.getAnubisProperty();
@@ -25,6 +29,11 @@ public class InjectManager {
     }
 
     public static void inject(Class<?> target) {
+        //初始化过, 不在去初始化了
+        if (cache.contains(target)){
+            return;
+        }
+        cache.add(target);
         Field[] declaredFields = target.getDeclaredFields();
         for (Field field : declaredFields) {
             Inject inject = field.getDeclaredAnnotation(Inject.class);
@@ -41,7 +50,7 @@ public class InjectManager {
                 throw new InjectException("类:[" + target.getName() + "] 中字段[" + field.getName() + "] 注入失败, 没找到合适的注入类型");
             }
             // 实例化要注入的类
-            Object instance = ReflectUtils.getInstance(injectType);
+            Object instance = ReflectUtils.getInstance(injectType, target.getClassLoader());
             ReflectUtils.setFiledValue(field, null, instance);
         }
 

@@ -27,7 +27,7 @@ public class DynamicRunEngine {
 
     public DynamicRunEngine() {
         compilerContext = new AnubisCompilerContext();
-        classLoader = new AnubisClassLoader(Thread.currentThread().getContextClassLoader(),compilerContext);
+        classLoader = new AnubisClassLoader(Thread.currentThread().getContextClassLoader(), compilerContext);
     }
 
     /**
@@ -51,13 +51,14 @@ public class DynamicRunEngine {
 
     /**
      * 加载对应的class对象, 如果不存在, 则使用传入的 JavaFile 对象去编译加载
+     *
      * @param javaFile
      */
     @SneakyThrows
-    public Class<?> loadClass(JavaFile javaFile){
+    public Class<?> loadClass(JavaFile javaFile) {
         String javaAllClassName = javaFile.getJavaAllClassName();
         //还没有对应的 class对象,那么开始编译
-        if(!compilerContext.isExistClass(javaAllClassName)){
+        if (!compilerContext.isExistClass(javaAllClassName)) {
             compiler(ListUtils.to(javaFile));
         }
         return classLoader.loadClass(javaAllClassName);

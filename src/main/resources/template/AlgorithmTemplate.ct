@@ -27,6 +27,8 @@ public class AlgorithmTemplate_${name} implements TestCaseExecuter, ${algorithmI
         if (interceptor != null) {
             interceptor.after(t);
         }
+
+        ${resultConvert}
         //return resuly;
         ${resultReturn}
     }
