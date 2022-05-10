@@ -4,14 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.chy</groupId>
-    <artifactId>anubis</artifactId>
-    <packaging>jar</packaging>
-    <version>1.1.0</version>
+    <groupId>org.chy.anubis</groupId>
+    <artifactId>parent-anubis</artifactId>
+    <packaging>pom</packaging>
+    <version>1.2.0</version>
+    <modules>
+        <module>core</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <anubis-version>1.2.0</anubis-version>
     </properties>
 
     <dependencies>
@@ -77,7 +81,7 @@
         <dependency>
             <groupId>io.github.cao2068959</groupId>
             <artifactId>sun-tools-javac</artifactId>
-            <version>8.0.0</version>
+            <version>8.1.0</version>
         </dependency>
 
         <dependency>
@@ -87,6 +91,20 @@
         </dependency>
 
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.chy.anubis</groupId>
+                <artifactId>core</artifactId>
+                <version>${anubis-version}</version>
+            </dependency>
+
+
+        </dependencies>
+
+
+    </dependencyManagement>
 
     <build>
         <plugins>

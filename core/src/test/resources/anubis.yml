@@ -1,0 +1,12 @@
+anubis:
+  treasury:
+    type: anubisService
+    anubisService:
+      host: http://127.0.0.1:8080
+    github:
+      user: xxx
+    gitee:
+      user: giteee
+  localcode:
+    refresh: true
+    #path: /Users/bignosecat/IdeaProjects/netty/anubis/src/test/java
