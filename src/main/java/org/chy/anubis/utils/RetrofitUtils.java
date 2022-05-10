@@ -14,11 +14,11 @@ public class RetrofitUtils {
         try {
             Response<T> result = call.execute();
             if (!result.isSuccessful()) {
-                throw new HttpRequestException("请求[" + call.request().toString() + "]失败 code:[" + result.code() + "] errorMsg:[" + result.errorBody() + "]");
+                throw new HttpRequestException("请求[" + call.request() + "]失败 code:[" + result.code() + "] errorMsg:[" + result.errorBody() + "]");
             }
             return result.body();
         } catch (IOException e) {
-            throw new HttpRequestException("请求[" + call.request().toString() + "]失败", e);
+            throw new HttpRequestException("请求[" + call.request() + "]失败", e);
         }
     }
 

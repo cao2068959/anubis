@@ -5,6 +5,7 @@ import org.chy.anubis.exception.ReflectExecException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class ReflectUtils {
 
@@ -50,7 +51,7 @@ public class ReflectUtils {
         }
     }
 
-    public static Object getInstance(String type,ClassLoader classLoader) {
+    public static Object getInstance(String type, ClassLoader classLoader) {
         Class<?> aClass;
         try {
             aClass = classLoader.loadClass(type);
@@ -60,5 +61,44 @@ public class ReflectUtils {
         return getInstance(aClass);
     }
 
+
+    public static Object exeMethod(Object obj, String methodName, Object... ags) {
+        try {
+            Class<?> type = obj.getClass();
+            Method declaredMethod = findMethod(type, methodName, ags);
+            if (declaredMethod == null){
+                throw new ReflectExecException("类[" + obj.getClass() + "]中没找到对应的方法 [" + methodName + "] ");
+            }
+            declaredMethod.setAccessible(true);
+            return declaredMethod.invoke(obj, ags);
+        } catch (Exception e) {
+            throw new ReflectExecException("类[" + obj.getClass() + "]反射执行方法 [" + methodName + "] 失败 ", e);
+        }
+    }
+
+    private static Method findMethod(Class<?> type, String methodName, Object... ags) {
+        Method[] declaredMethods = type.getDeclaredMethods();
+        for (Method declaredMethod : declaredMethods) {
+            if (!methodName.equals(declaredMethod.getName())) {
+                continue;
+            }
+            if (declaredMethod.getParameterCount() != ags.length) {
+                continue;
+            }
+            Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
+            boolean isfind = true;
+            for (int i = 0; i < parameterTypes.length; i++) {
+                Class<?> parameterType = parameterTypes[i];
+                if (!parameterType.isInstance(ags[i])) {
+                    isfind = false;
+                    break;
+                }
+            }
+            if (isfind) {
+                return declaredMethod;
+            }
+        }
+        return null;
+    }
 
 }

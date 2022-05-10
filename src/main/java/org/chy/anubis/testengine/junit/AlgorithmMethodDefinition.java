@@ -29,6 +29,9 @@ public class AlgorithmMethodDefinition {
     private void parseAnnotation(Trial trial) {
         this.caseSourceType = trial.caseSourceType();
         this.algorithmName = trial.value();
+        if (algorithmName.contains("-")) {
+            algorithmName = algorithmName.replace("-", "_");
+        }
         this.limit = trial.limit();
         this.startIndex = trial.startIndex();
         this.excludeCaseName = Arrays.stream(trial.excludeCaseName()).collect(Collectors.toSet());
@@ -60,17 +63,13 @@ public class AlgorithmMethodDefinition {
 
     /**
      * 根据查询到用例名称和配置信息来获取应该返回的用例信息
-     *
      */
-    public Set<String> findCaseName(){
-        if (!runCaseName.isEmpty()){
+    public Set<String> findCaseName() {
+        if (!runCaseName.isEmpty()) {
             return new HashSet<>(runCaseName);
         }
         return null;
     }
-
-
-
 
 
     @Override

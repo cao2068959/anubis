@@ -1,7 +1,5 @@
 package org.chy.anubis.dynamic.compiler;
 
-import com.sun.source.util.JavacTask;
-import com.sun.tools.javac.api.JavacTool;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.chy.anubis.entity.JavaFile;
@@ -11,8 +9,10 @@ import org.chy.anubis.utils.ListUtils;
 import org.chy.anubis.utils.StringUtils;
 import org.chy.anubis.utils.WarehouseUtils;
 
+import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,19 +28,20 @@ import static org.chy.anubis.Constant.TREASURY_BASE_PATH;
  */
 public class AnubisCompilerContext {
 
-    private static final JavacTool javaCompiler;
+    private static final JavaCompiler javaCompiler;
     private static final StandardJavaFileManager standardFileManager;
-    private AnubisJavaFileManager anubisJavaFileManager;
+    private AnubisJavaModuleFileManager anubisJavaFileManager;
 
     static {
-        javaCompiler = JavacTool.create();
+
+        javaCompiler = ToolProvider.getSystemJavaCompiler();
         standardFileManager = javaCompiler.getStandardFileManager(diagnostic -> {
                 },
                 Locale.CHINESE, StandardCharsets.UTF_8);
     }
 
     public AnubisCompilerContext() {
-        anubisJavaFileManager = new AnubisJavaFileManager(standardFileManager);
+        anubisJavaFileManager = new AnubisJavaModuleFileManager(standardFileManager);
     }
 
     public void compiler(List<JavaFile> javaFiles) {
@@ -56,9 +57,7 @@ public class AnubisCompilerContext {
             return;
         }
 
-
-
-        JavacTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, ListUtils.to("-proc:none"), null,
+        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, ListUtils.to("-proc:none"), null,
                 javaSourceFileObjects);
 
         Boolean result = task.call();
