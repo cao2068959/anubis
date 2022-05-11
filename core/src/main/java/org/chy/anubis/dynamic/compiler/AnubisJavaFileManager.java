@@ -40,13 +40,12 @@ public class AnubisJavaFileManager implements JavaFileManager {
             if (kinds.contains(JavaFileObject.Kind.CLASS)) {
                 result.addAll(findClassJavaFileObject(location, packageName, kinds, recurse));
             }
-            if (result.size() != 0) {
-                return result;
-            }
+
             //查找编译所依赖的 源码文件
             if (kinds.contains(JavaFileObject.Kind.SOURCE)) {
-                return findSourceJavaFileObject(location, packageName, kinds, recurse);
+                result.addAll(findSourceJavaFileObject(location, packageName, kinds, recurse));
             }
+            return result;
         }
         return standardJavaFileManager.list(location, packageName, kinds, recurse);
     }
