@@ -8,6 +8,7 @@ import org.chy.anubis.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JavaMethodInfo {
@@ -36,15 +37,20 @@ public class JavaMethodInfo {
     }
 
 
-
     public Optional<String> getReturnType() {
         Type type = methodDeclaration.getType();
         return Optional.ofNullable(type.asString());
     }
 
     public List<ParameterInfo> getParameter() {
-        return methodDeclaration.getParameters().stream().map(parameter -> new ParameterInfo(parameter.getTypeAsString(),
-                parameter.getNameAsString())).collect(Collectors.toList());
+        return methodDeclaration.getParameters().stream().map(parameter -> {
+            ParameterInfo parameterInfo = new ParameterInfo(parameter.getTypeAsString(),
+                    parameter.getNameAsString());
+            Set<String> annotations = parameter.getAnnotations().stream()
+                    .map(annotationExpr -> annotationExpr.getName().asString()).collect(Collectors.toSet());
+            parameterInfo.setAnnotations(annotations);
+            return parameterInfo;
+        }).collect(Collectors.toList());
     }
 
 }

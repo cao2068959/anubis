@@ -24,6 +24,7 @@ public class AlgorithmTemplate_${name} implements TestCaseExecuter, ${algorithmI
         //T result = instance.xxx(aa,bb);
         ${testMethodReturn}${testMethodReturnFlag}instance.${testMethodName}(${testMethodArgs});
 
+        ${coverObjectExpressions}
         if (interceptor != null) {
             interceptor.after(t);
         }

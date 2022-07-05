@@ -2,8 +2,10 @@ package org.chy.anubis.utils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.chy.anubis.exception.ReflectExecException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,6 +91,11 @@ public class TypeUtils {
         return objectMapper.readValue(jsonString, type);
     }
 
+    @SneakyThrows
+    public static <T> T convert(Object data, TypeReference<T> typeReference) {
+        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+        return objectMapper.readValue(jsonString, typeReference);
+    }
 
     /**
      * 生成对应的通用转换表达式
@@ -99,12 +106,82 @@ public class TypeUtils {
      * @return 对应的转换表达式
      */
     public static String genConvertExpression(String oldIntanceName, String newType, String newIntanceName) {
-        String converTemplate = "${converType} ${newIntance} = org.chy.anubis.utils.TypeUtils.convert(${convertValue}, ${converType}.class);";
+        String converTemplate = "${converType} ${newIntance} = org.chy.anubis.utils.TypeUtils.convert(${convertValue}, new com.fasterxml.jackson.core.type.TypeReference<${converType}>(){});";
         Map<String, String> params = new HashMap<>();
         params.put("newIntance", newIntanceName);
-        params.put("converType", newType);
+        params.put("converType", toWrapperType(newType));
         params.put("convertValue", oldIntanceName);
         return PlaceholderUtils.replacePlaceholder(converTemplate, params, "${", "}");
     }
+
+    /**
+     * 覆盖对象的值
+     *
+     * @param victim 需要被覆盖的对象
+     * @param value  对应覆盖的值
+     */
+    public static void coverObject(Object victim, Object value) {
+        Class<?> victimClass = victim.getClass();
+        Class<?> valueClass = victim.getClass();
+
+        if (victimClass.isArray()) {
+            coverArrayObject(victim, victimClass, value, valueClass);
+            return;
+        }
+        coverObject(victim, victimClass, value, valueClass);
+    }
+
+    /**
+     * 生成对应的覆盖表达式
+     *
+     * @param victimName 要被覆盖的对象名称
+     * @param coverName  用什么对象去覆盖
+     */
+    public static String genCoverObjectExpression(String victimName, String coverName) {
+        String converTemplate = "org.chy.anubis.utils.TypeUtils.coverObject(${victimName}, ${coverName});";
+        Map<String, String> params = new HashMap<>();
+        params.put("victimName", victimName);
+        params.put("coverName", coverName);
+        return PlaceholderUtils.replacePlaceholder(converTemplate, params, "${", "}");
+    }
+
+    /**
+     * 数组对象的覆盖
+     *
+     * @param victim 要被覆盖的数组
+     * @param value  对应覆盖的值
+     */
+    private static void coverArrayObject(Object victim, Class<?> victimClass, Object value, Class<?> valueClass) {
+        if (!victimClass.isArray() || !valueClass.isArray()) {
+            throw new ReflectExecException("非法的参数: 入参仅仅只支持数组");
+        }
+
+        Object[] victimArray = (Object[]) victim;
+        Object[] valueArray = (Object[]) value;
+        // 数组长度不同, 先去把长度统一
+        if (valueArray.length != victimArray.length) {
+            System.arraycopy(victimArray, 0, valueArray, 0, valueArray.length);
+        }
+
+        for (int i = 0; i < valueArray.length; i++) {
+            Object valueItem = valueArray[i];
+            if (valueItem == null) {
+                victimArray[i] = null;
+                continue;
+            }
+            Object item = victimArray[i];
+            // 类型完全相同 直接赋值就行了
+            if (typeMatch(valueItem.getClass().getTypeName(), item.getClass().getName())) {
+                victimArray[i] = valueItem;
+            }
+            coverObject(item, item.getClass(), valueItem, valueItem.getClass());
+        }
+
+    }
+
+    private static void coverObject(Object victim, Class<?> victimClass, Object value, Class<?> valueClass) {
+        //TODO 暂时没场景
+    }
+
 
 }

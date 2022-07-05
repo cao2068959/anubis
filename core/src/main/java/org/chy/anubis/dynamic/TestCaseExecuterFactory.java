@@ -1,12 +1,12 @@
 package org.chy.anubis.dynamic;
 
 import org.chy.anubis.Constant;
+import org.chy.anubis.dynamic.paramatch.ParamMappingBO;
 import org.chy.anubis.dynamic.paramatch.ParamMatch;
 import org.chy.anubis.dynamic.template.CtTemplate;
 import org.chy.anubis.dynamic.template.TestCaseExecuter;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.JavaMethodInfo;
-import org.chy.anubis.entity.Pair;
 import org.chy.anubis.entity.ParameterInfo;
 import org.chy.anubis.localcode.LocalCodeManager;
 import org.chy.anubis.utils.ReflectUtils;
@@ -87,21 +87,58 @@ public class TestCaseExecuterFactory {
         //对返回值做一些处理
         bootstrapClassReturnHandle(algorithmInterfaceMethod, testMethod, ctTemplate);
         //参数处理
-        bootstrapClassParamsHandle(algorithmInterfaceMethod, testMethod, ctTemplate);
+        List<ParamMappingBO> paramMappingBOS = bootstrapClassParamsHandle(algorithmInterfaceMethod, testMethod, ctTemplate);
+
+        // 算法接口中打了注解 @Reaction 的参数, 需要再转换回去
+        reactionParamHandle(paramMappingBOS, ctTemplate);
 
         //执行模版生成对应的新java源码
         return ctTemplate.executeTemplate();
     }
 
+    private void reactionParamHandle(List<ParamMappingBO> paramMappingBOS, CtTemplate ctTemplate) {
+        StringBuilder coverObjectExpressions = new StringBuilder("");
 
-    private void bootstrapClassParamsHandle(JavaMethodInfo algorithmInterfaceMethod, Method method, CtTemplate ctTemplate) {
+        paramMappingBOS.stream().filter(paramMappingBO -> {
+            ParameterInfo parameterInfo = paramMappingBO.getParameterInfo();
+            return parameterInfo.getAnnotations().contains("Reaction");
+        }).forEach(paramMappingBO -> {
+            String algorithmParamName = paramMappingBO.getParameterInfo().getName();
+            String localParamName = paramMappingBO.getNewParamName();
+            if (algorithmParamName.equals(localParamName)){
+                return;
+            }
+            String expressions = TypeUtils.genCoverObjectExpression(paramMappingBO.getParameterInfo().getName(), paramMappingBO.getNewParamName());
+            coverObjectExpressions.append(expressions).append("\n");
+        });
+        ctTemplate.addParam("coverObjectExpressions", coverObjectExpressions.toString());
+    }
+
+
+    private List<ParamMappingBO> bootstrapClassParamsHandle(JavaMethodInfo algorithmInterfaceMethod, Method method, CtTemplate ctTemplate) {
         List<ParameterInfo> parameters = algorithmInterfaceMethod.getParameter();
+        // 寻找本地方法以及远程接口 参数的对应关系是什么
+        List<ParamMappingBO> paramMappingBOS = ParamMatch.match(method, parameters);
+        // 生成对应的字符串, 用于放置进模版中
+        StringBuilder testMethodArgs = new StringBuilder();
+        StringBuilder testMethodArgsConvert = new StringBuilder();
 
-        Pair<String, String> match = ParamMatch.match(method, parameters);
+        paramMappingBOS.forEach(paramMappingBO -> {
+            if (testMethodArgs.length() != 0) {
+                testMethodArgs.append(", ");
+            }
+            testMethodArgs.append(paramMappingBO.getNewParamName());
+
+            String convertExpression = paramMappingBO.getConvertExpression();
+            if (convertExpression != null) {
+                testMethodArgsConvert.append(convertExpression).append("\n");
+            }
+        });
 
         //生成对应的参数
-        ctTemplate.addParam("testMethodArgs", match.getKey());
-        ctTemplate.addParam("testMethodArgsConvert", match.getValue());
+        ctTemplate.addParam("testMethodArgs", testMethodArgs.toString());
+        ctTemplate.addParam("testMethodArgsConvert", testMethodArgsConvert.toString());
+        return paramMappingBOS;
     }
 
 

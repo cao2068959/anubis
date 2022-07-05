@@ -2,10 +2,13 @@ package org.chy.anubis.entity;
 
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class ParameterInfo {
     public String type;
     public String name;
+    public Set<String> annotations;
 
     public ParameterInfo(String type, String name) {
         this.type = type;

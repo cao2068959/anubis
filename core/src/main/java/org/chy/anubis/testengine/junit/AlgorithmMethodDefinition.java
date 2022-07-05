@@ -29,6 +29,12 @@ public class AlgorithmMethodDefinition {
     private void parseAnnotation(Trial trial) {
         this.caseSourceType = trial.caseSourceType();
         this.algorithmName = trial.value();
+        char startChar = algorithmName.charAt(0);
+        // 算法的名称是数字开头的, 在前面拼接上 n 如: 3Sum ---> n3Sum
+        if (startChar >= 48 && startChar <= 57) {
+            algorithmName = "n" + algorithmName;
+        }
+
         if (algorithmName.contains("-")) {
             algorithmName = algorithmName.replace("-", "_");
         }

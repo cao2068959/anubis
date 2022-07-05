@@ -7,7 +7,7 @@
     <groupId>org.chy.anubis</groupId>
     <artifactId>parent-anubis</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <modules>
         <module>core</module>
     </modules>
@@ -15,7 +15,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <anubis-version>1.2.0</anubis-version>
+        <anubis-version>1.2.1</anubis-version>
     </properties>
 
     <dependencies>

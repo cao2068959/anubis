@@ -21,6 +21,7 @@ public abstract class AbstractParamMatch implements IParamMatch {
             if (parameterInfo == null) {
                 continue;
             }
+            matchResult.setParameterInfo(parameterInfo);
             //已经匹配过的就移除
             candidateParam.remove(parameterInfo);
         }
