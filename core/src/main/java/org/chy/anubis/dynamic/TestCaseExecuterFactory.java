@@ -150,7 +150,7 @@ public class TestCaseExecuterFactory {
     private void bootstrapClassReturnHandle(JavaMethodInfo algorithmInterfaceMethod, Method testMethod, CtTemplate ctTemplate) {
         Optional<String> returnType = algorithmInterfaceMethod.getReturnType();
         Class<?> testMethodReturnType = testMethod.getReturnType();
-        if (!returnType.isPresent() || testMethodReturnType == Void.class) {
+        if (!returnType.isPresent() || testMethodReturnType == Void.class || testMethodReturnType == void.class) {
             ctTemplate.addParam("testMethodReturn", "");
             ctTemplate.addParam("testMethodReturnFlag", "");
             ctTemplate.addParam("resultReturn", "");
