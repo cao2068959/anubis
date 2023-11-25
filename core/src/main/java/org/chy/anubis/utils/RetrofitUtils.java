@@ -9,7 +9,6 @@ import java.io.IOException;
 
 public class RetrofitUtils {
 
-
     public static <T> T exec(Call<T> call) {
         try {
             Response<T> result = call.execute();
@@ -22,13 +21,11 @@ public class RetrofitUtils {
         }
     }
 
-        public static <T> T execJsonResult(Call<JsonResult<T>> call) {
+    public static <T> T execJsonResult(Call<JsonResult<T>> call) {
         JsonResult<T> jsonResult = exec(call);
         if (!jsonResult.isSuccess()) {
             throw new HttpRequestException("请求[" + call.request().toString() + "]失败 errorMsg:[" + jsonResult.getMsg() + "]");
         }
         return jsonResult.getData();
     }
-
-
 }

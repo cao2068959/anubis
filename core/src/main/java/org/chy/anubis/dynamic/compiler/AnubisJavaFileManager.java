@@ -1,6 +1,8 @@
 package org.chy.anubis.dynamic.compiler;
 
 
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.chy.anubis.entity.JavaFile;
 import org.chy.anubis.entity.Pair;
 import org.chy.anubis.localcode.LocalCodeManager;
@@ -9,6 +11,10 @@ import org.chy.anubis.utils.WarehouseUtils;
 
 import javax.tools.*;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -23,14 +29,29 @@ public class AnubisJavaFileManager implements JavaFileManager {
     Map<String, List<JavaFileObject>> classCache = new ConcurrentHashMap<>();
     //源码文件的缓存
     Map<String, List<JavaFileObject>> sourceCache = new ConcurrentHashMap<>();
+    Set<URL> processsorPaths = new HashSet<>();
 
     public AnubisJavaFileManager(StandardJavaFileManager standardJavaFileManager) {
         this.standardJavaFileManager = standardJavaFileManager;
+        initClasspath();
+    }
+
+    @SneakyThrows
+    private void initClasspath() {
+        Class<?> lombok = Class.forName("lombok.Data");
+        ProtectionDomain domain = lombok.getProtectionDomain();
+        if (domain != null && domain.getCodeSource() != null) {
+            this.addProcessorPath(domain.getCodeSource().getLocation());
+        }
     }
 
     @Override
     public ClassLoader getClassLoader(Location location) {
-        return null;
+        if (location == StandardLocation.ANNOTATION_PROCESSOR_PATH) {
+            return new URLClassLoader(this.processsorPaths.toArray(new URL[0]),
+                    this.standardJavaFileManager.getClass().getClassLoader());
+        }
+        return ClassLoader.getSystemClassLoader();
     }
 
     @Override
@@ -219,4 +240,22 @@ public class AnubisJavaFileManager implements JavaFileManager {
         return getCompilerFile(allPath).isPresent();
     }
 
+    public void addProcessorPath(URL processorUrl) {
+        this.processsorPaths.add(processorUrl);
+    }
+
+    @SneakyThrows
+    public Set<String> findAnnotationProcessor() {
+        Set<String> processors = new HashSet<>();
+        if (!this.processsorPaths.isEmpty()) {
+            ClassLoader apClassloader = getClassLoader(StandardLocation.ANNOTATION_PROCESSOR_PATH);
+            Enumeration<URL> resources = apClassloader.getResources("META-INF/services/javax.annotation.processing.Processor");
+            while (resources.hasMoreElements()) {
+                try (InputStream in = resources.nextElement().openStream()) {
+                    processors.addAll(Arrays.asList(IOUtils.toString(in).split("\n")));
+                }
+            }
+        }
+        return processors;
+    }
 }

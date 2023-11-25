@@ -12,9 +12,12 @@ import org.chy.anubis.utils.WarehouseUtils;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -33,11 +36,15 @@ public class AnubisCompilerContext {
     private AnubisJavaFileManager anubisJavaFileManager;
 
     static {
-
         javaCompiler = ToolProvider.getSystemJavaCompiler();
         standardFileManager = javaCompiler.getStandardFileManager(diagnostic -> {
                 },
                 Locale.CHINESE, StandardCharsets.UTF_8);
+        try {
+            standardFileManager.setLocation(StandardLocation.ANNOTATION_PROCESSOR_PATH, Collections.emptyList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public AnubisCompilerContext() {
@@ -48,8 +55,6 @@ public class AnubisCompilerContext {
         } else {
             anubisJavaFileManager = new AnubisJavaModuleFileManager(standardFileManager);
         }
-
-
     }
 
     public void compiler(List<JavaFile> javaFiles) {
@@ -65,7 +70,7 @@ public class AnubisCompilerContext {
             return;
         }
 
-        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, ListUtils.to("-proc:none"), null,
+        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, anubisJavaFileManager, null, buildOptions(), null,
                 javaSourceFileObjects);
 
         Boolean result = task.call();
@@ -73,6 +78,13 @@ public class AnubisCompilerContext {
             String fileMsg = StringUtils.join("[", "]", javaFiles, JavaFile::getName);
             throw new CompilerException("动态编译文件失败 " + fileMsg);
         }
+    }
+
+    private Iterable<String> buildOptions() {
+        List<String> options = new ArrayList<>();
+        options.add("-processor");
+        options.add(String.join(",", this.anubisJavaFileManager.findAnnotationProcessor()));
+        return options;
     }
 
     /**
@@ -113,5 +125,4 @@ public class AnubisCompilerContext {
     public boolean isExistClass(String path) {
         return anubisJavaFileManager.isExistClass(path);
     }
-
 }
